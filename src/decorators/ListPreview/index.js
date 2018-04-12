@@ -22,3 +22,8 @@ export default class ListPreview extends PureComponent {
     );
   }
 }
+
+
+export function listPreviewDefaultRenderer(props){
+  return <ListPreview {...props}/>
+}

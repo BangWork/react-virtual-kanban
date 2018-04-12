@@ -37,10 +37,10 @@ class Kanban extends PureComponent {
 
   static defaultProps = {
     lists: [],
-    itemComponent: decorators.Item,
-    listComponent: decorators.List,
-    itemPreviewComponent: decorators.ItemPreview,
-    listPreviewComponent: decorators.ListPreview,
+    itemRenderer: decorators.itemDefaultRenderer,
+    listRenderer: decorators.listDefaultRenderer,
+    itemPreviewRenderer: decorators.itemPreviewDefaultRenderer,
+    listPreviewRenderer: decorators.listPreviewDefaultRenderer,
     onMoveRow: () => {},
     onMoveList: () => {},
     onDropRow: () => {},
@@ -219,8 +219,8 @@ class Kanban extends PureComponent {
         key={list.id}
         listId={list.id}
         listStyle={style}
-        listComponent={this.props.listComponent}
-        itemComponent={this.props.itemComponent}
+        listRenderer={this.props.listRenderer}
+        itemRenderer={this.props.itemRenderer}
         list={list}
         moveRow={this.onMoveRow}
         moveList={this.onMoveList}
@@ -243,8 +243,8 @@ class Kanban extends PureComponent {
       width,
       height,
       listWidth,
-      itemPreviewComponent,
-      listPreviewComponent,
+      itemPreviewRenderer,
+      listPreviewRenderer,
       overscanListCount,
       scrollToList,
       scrollToAlignment,
@@ -274,8 +274,8 @@ class Kanban extends PureComponent {
         />
         <DragLayer
           lists={lists}
-          itemPreviewComponent={itemPreviewComponent}
-          listPreviewComponent={listPreviewComponent}
+          itemPreviewRenderer={itemPreviewRenderer}
+          listPreviewRenderer={listPreviewRenderer}
         />
       </div>
     );

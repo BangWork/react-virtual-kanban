@@ -47,3 +47,8 @@ export default class List extends PureComponent {
     );
   }
 }
+
+export function listDefaultRenderer(props){
+  const {children, ...listProps} = props; 
+  return <List {...listProps}>{children}</List>
+}

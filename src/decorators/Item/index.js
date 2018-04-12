@@ -27,3 +27,8 @@ export default class Item extends PureComponent {
     ));
   }
 }
+
+export function iteamDefaultRenderer(props){
+  return <Item {...props}/>
+}
+

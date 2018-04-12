@@ -23,3 +23,7 @@ export default class ItemPreview extends PureComponent {
     );
   }
 }
+
+export function iteamPreviewDefaultRenderer(props){
+  return <ItemPreview {...props}/>
+}

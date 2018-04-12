@@ -1,4 +1,4 @@
-export Item from './Item';
-export ItemPreview from './ItemPreview';
-export List from './List';
-export ListPreview from './ListPreview';
+export Item, { itemDefaultRenderer } from './Item';
+export ItemPreview, { itemPreviewDefaultRenderer } from './ItemPreview';
+export List, { listDefaultRenderer } from './List';
+export ListPreview, { listPreviewDefaultRenderer } from './ListPreview';

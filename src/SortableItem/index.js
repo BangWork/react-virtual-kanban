@@ -23,24 +23,17 @@ class SortableItem extends PureComponent {
       row,
       rowId,
       listId,
-      itemComponent: DecoratedItem,
+      itemRenderer,
       isDragging,
       connectDragSource,
       connectDropTarget,
       rowStyle,
     } = this.props;
 
-    return (
-      <DecoratedItem
-        row={row}
-        rowId={rowId}
-        listId={listId}
-        rowStyle={rowStyle}
-        isDragging={isDragging}
-        connectDragSource={connectDragSource}
-        connectDropTarget={connectDropTarget}
-      />
-    );
+    const itemProps = {
+      row, rowId, listId, rowStyle, isDragging, connectDropTarget, connectDragSource
+    };
+    return itemRenderer(itemProps);
   }
 }
 
