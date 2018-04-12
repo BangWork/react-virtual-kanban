@@ -58,7 +58,7 @@ class SortableList extends PureComponent {
   }
 
   onDropRow=(params)=>{
-    return callWithListInfo(this.propsDropRow, params, this.props);
+    return callWithListInfo(this.props.dropRow, params, this.props);
   }
 
   renderRow({ index, key, style }) {
