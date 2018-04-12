@@ -14,6 +14,13 @@ import * as propTypes from './propTypes';
 import PureComponent from '../PureComponent';
 
 const identity = (c) => c;
+function callWithListInfo(func,params, props){
+  return func({
+    ...params,
+    listId: props.listId,
+    list: props.list,
+  })
+}
 
 class SortableList extends PureComponent {
   static propTypes = propTypes;
@@ -38,6 +45,22 @@ class SortableList extends PureComponent {
     }
   }
 
+  onDragBeginRow=(params) => {
+    return callWithListInfo(this.props.dragBeginRow, params, this.props);
+  }
+
+  onDragEndRow=(params) => {
+    return callWithListInfo(this.props.dragEndRow, params, this.props);
+  }
+
+  onMoveRow=(params)=>{
+    return callWithListInfo(this.props.moveRow, params, this.props);
+  }
+
+  onDropRow=(params)=>{
+    return callWithListInfo(this.propsDropRow, params, this.props);
+  }
+
   renderRow({ index, key, style }) {
     const row = this.props.list.rows[index];
 
@@ -49,10 +72,10 @@ class SortableList extends PureComponent {
         listId={this.props.listId}
         rowStyle={style}
         itemRenderer={this.props.itemRenderer}
-        moveRow={this.props.moveRow}
-        dropRow={this.props.dropRow}
-        dragBeginRow={this.props.dragBeginRow}
-        dragEndRow={this.props.dragEndRow}
+        moveRow={this.onMoveRow}
+        dropRow={this.onDropRow}
+        dragBeginRow={this.onDragBeginRow}
+        dragEndRow={this.onDragEndRow}
         findItemIndex={this.props.findItemIndex}
       />
     );
