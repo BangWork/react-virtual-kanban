@@ -36,30 +36,26 @@ class KanbanDragLayer extends PureComponent {
   renderItem(type, item) {
     const {
       lists,
-      itemPreviewComponent: ItemPreview,
-      listPreviewComponent: ListPreview,
+      itemPreviewRenderer,
+      listPreviewRenderer,
     } = this.props;
 
     switch (type) {
     case ItemTypes.ROW_TYPE:
-      return (
-        <ItemPreview
-          row={item.row}
-          rowId={item.rowId}
-          rowStyle={item.rowStyle}
-          containerWidth={item.containerWidth}
-          isGhost={findItemIndex(lists, item.rowId) === -1}
-        />
-      );
+      return itemPreviewRenderer({
+        row: item.row,
+        rowId: item.rowId,
+        rowStyle: item.rowStyle,
+        containerWidth: item.containerWidth,
+        isGost:findItemIndex(lists, item.rowId) === -1,
+      });
     case ItemTypes.LIST_TYPE:
-      return (
-        <ListPreview
-          list={item.list}
-          listId={item.listId}
-          listStyle={item.listStyle}
-          isGhost={findListIndex(lists, item.listId) === -1}
-        />
-      );
+      return listPreviewRenderer({
+        list: item.list,
+        listId: item.listId,
+        listStyle: item.listStyle,
+        isGost: findListIndex(lists, item.listId) === -1,
+      });
     default:
       return null;
     }

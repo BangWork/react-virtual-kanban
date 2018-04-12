@@ -48,7 +48,7 @@ class SortableList extends PureComponent {
         rowId={row.id}
         listId={this.props.listId}
         rowStyle={style}
-        itemComponent={this.props.itemComponent}
+        itemRenderer={this.props.itemRenderer}
         moveRow={this.props.moveRow}
         dropRow={this.props.dropRow}
         dragBeginRow={this.props.dragBeginRow}
@@ -59,20 +59,18 @@ class SortableList extends PureComponent {
   }
 
   renderItemForMeasure({ rowIndex }) {
-    const { itemComponent: DecoratedItem } = this.props;
+    const { itemRenderer } = this.props;
     const row = this.props.list.rows[rowIndex];
 
-    return (
-      <DecoratedItem
-        row={row}
-        rowId={row.id}
-        listId={this.props.listId}
-        rowStyle={{}}
-        isDragging={false}
-        connectDragSource={identity}
-        connectDropTarget={identity}
-      />
-    );
+    const itemProps = {
+      row, rowId: row.id, 
+      listId: this.props.listId, 
+      rowStyle: {},
+      isDragging: false, 
+      connectDropTarget: identity, 
+      connectDragSource: identity,
+    };
+    return itemRenderer(itemProps);
   }
 
   renderList({ width, height }) {
@@ -106,28 +104,21 @@ class SortableList extends PureComponent {
     const {
       list,
       listId,
-      listComponent: DecoratedList,
+      listRenderer,
       isDragging,
       connectDragSource,
       connectDropTarget,
       listStyle,
     } = this.props;
 
-    return (
-      <DecoratedList
-        list={list}
-        listId={listId}
-        rows={list.rows}
-        listStyle={listStyle}
-        isDragging={isDragging}
-        connectDragSource={connectDragSource}
-        connectDropTarget={connectDropTarget}
-      >
-        <AutoSizer>
+    const children = (<AutoSizer>
           {(dimensions) => this.renderList(dimensions)}
-        </AutoSizer>
-      </DecoratedList>
-    );
+        </AutoSizer>);
+    const listProps = {
+      list, listId, listStyle, isDragging, connectDragSource, connectDropTarget,
+      children,
+    };
+    return listRenderer(listProps);
   }
 }
 
