@@ -1,9 +1,9 @@
 import React from 'react';
-import { List as VirtualScroll, CellMeasurer, AutoSizer } from 'react-virtualized';
+import { List, CellMeasurer, CellMeasurerCache, AutoSizer } from 'react-virtualized';
 import { DragSource, DropTarget } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 
-import { ItemCache } from './itemCache';
+// import { ItemCache } from './itemCache';
 import SortableItem from '../SortableItem';
 
 import { LIST_TYPE, ROW_TYPE } from '../types';
@@ -13,7 +13,7 @@ import * as propTypes from './propTypes';
 
 import PureComponent from '../PureComponent';
 
-const identity = (c) => c;
+// const identity = (c) => c;
 function callWithListInfo(func,params, props){
   return func({
     ...params,
@@ -24,25 +24,41 @@ function callWithListInfo(func,params, props){
 
 class SortableList extends PureComponent {
   static propTypes = propTypes;
+  static defaultProps = {
+    defaultCardHeight: 60,
+  }
 
   constructor(props) {
     super(props);
 
     this.renderRow = this.renderRow.bind(this);
-    this.renderItemForMeasure = this.renderItemForMeasure.bind(this);
     this.renderList = this.renderList.bind(this);
-  }
 
+    this.measureCache = new CellMeasurerCache({
+      defaultHeight: props.defaultCardHeight,
+      fixedWidth: true,
+      keyMapper: this.keyMapper,
+    });  
+  }
+  
   componentDidMount() {
     this.props.connectDragPreview(getEmptyImage(), {
       captureDraggingState: true
     });
+  }
+  componentWillReceiveProps(nextProps) {
+    // todo if defaultCardHeight change, recreate cache.
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.list.rows !== this.props.list.rows && !!this._list) {
       this._list.recomputeRowHeights();
     }
+  }
+
+  keyMapper = (rowIndex) => {
+    const row = this.props.list[rowIndex]; 
+    return this.props.itemCacheKey(row);
   }
 
   onDragBeginRow=(params) => {
@@ -61,11 +77,17 @@ class SortableList extends PureComponent {
     return callWithListInfo(this.props.dropRow, params, this.props);
   }
 
-  renderRow({ index, key, style }) {
+  renderRow({ index, key, style, parent }) {
     const row = this.props.list.rows[index];
 
-    return (
-      <SortableItem
+    return (<CellMeasurer
+      cache={this.measureCache}
+      columnIndex={0}
+      rowIndex={index}
+      key={row.id}
+      parent={parent}
+    >
+      {({measure}) => ( <SortableItem
         key={row.id}
         row={row}
         rowId={row.id}
@@ -77,50 +99,39 @@ class SortableList extends PureComponent {
         dragBeginRow={this.onDragBeginRow}
         dragEndRow={this.onDragEndRow}
         findItemIndex={this.props.findItemIndex}
-      />
-    );
+        measure={measure}
+      />)}
+    </CellMeasurer>);
   }
 
-  renderItemForMeasure({ rowIndex }) {
-    const { itemRenderer } = this.props;
-    const row = this.props.list.rows[rowIndex];
+  // renderItemForMeasure({ rowIndex }) {
+  //   const { itemRenderer } = this.props;
+  //   const row = this.props.list.rows[rowIndex];
 
-    const itemProps = {
-      row, rowId: row.id, 
-      listId: this.props.listId, 
-      rowStyle: {},
-      isDragging: false, 
-      connectDropTarget: identity, 
-      connectDragSource: identity,
-    };
-    return itemRenderer(itemProps);
-  }
+  //   const itemProps = {
+  //     row, rowId: row.id, 
+  //     listId: this.props.listId, 
+  //     rowStyle: {},
+  //     isDragging: false, 
+  //     connectDropTarget: identity, 
+  //     connectDragSource: identity,
+  //   };
+  //   return itemRenderer(itemProps);
+  // }
 
   renderList({ width, height }) {
     // TODO: Check whether scrollbar is visible or not :/
 
-    return (
-      <CellMeasurer
-        width={width}
-        columnCount={1}
-        rowCount={this.props.list.rows.length}
-        cellRenderer={this.renderItemForMeasure}
-        cellSizeCache={new ItemCache(this.props.list.rows, this.props.itemCacheKey)}
-      >
-        {({ getRowHeight }) => (
-          <VirtualScroll
-            ref={(c) => (this._list = c)}
-            className='KanbanList'
-            width={width}
-            height={height}
-            rowHeight={getRowHeight}
-            rowCount={this.props.list.rows.length}
-            rowRenderer={this.renderRow}
-            overscanRowCount={this.props.overscanRowCount}
-           />
-         )}
-      </CellMeasurer>
-    );
+    return <List
+      ref={(c) => (this._list = c)}
+      className='KanbanList'
+      width={width}
+      height={height}
+      rowHeight={this.measureCache.rowHeight}
+      rowCount={this.props.list.rows.length}
+      rowRenderer={this.renderRow}
+      overscanRowCount={this.props.overscanRowCount}
+    />
   }
 
   render() {
@@ -135,8 +146,8 @@ class SortableList extends PureComponent {
     } = this.props;
 
     const children = (<AutoSizer>
-          {(dimensions) => this.renderList(dimensions)}
-        </AutoSizer>);
+      {(dimensions) => this.renderList(dimensions)}
+    </AutoSizer>);
     const listProps = {
       list, listId, listStyle, isDragging, connectDragSource, connectDropTarget,
       children,
