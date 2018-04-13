@@ -90,7 +90,7 @@ class SortableList extends PureComponent {
         listId={this.props.listId}
         rowStyle={style}
         itemRenderer={this.props.itemRenderer}
-        moveRow={this.props.onMoveRow}
+        moveRow={this.props.moveRow}
         dropRow={this.onDropRow}
         dragBeginRow={this.onDragBeginRow}
         dragEndRow={this.onDragEndRow}
