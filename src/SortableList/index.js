@@ -138,6 +138,7 @@ class SortableList extends PureComponent {
       listRenderer,
       isDragging,
       isDraggingOver,
+      canDrop,
       connectDragSource,
       connectDropTarget,
       listStyle,
@@ -147,8 +148,10 @@ class SortableList extends PureComponent {
       {(dimensions) => this.renderList(dimensions)}
     </AutoSizer>);
     const listProps = {
-      list, listId, listStyle, isDragging, isDraggingOver,
-      connectDragSource, connectDropTarget,
+      list, listId, listStyle, connectDragSource, connectDropTarget,
+      isDragging,
+      isDraggingOver,
+      canDrop,
       children,
     };
     return listRenderer(listProps);
@@ -157,7 +160,8 @@ class SortableList extends PureComponent {
 
 const connectDrop = DropTarget([LIST_TYPE, ROW_TYPE], dropSpec, (connect, monitor) => ({
   connectDropTarget: connect.dropTarget(),
-  isDraggingOver: monitor.isOver({ shallow: true }),
+  canDrop: monitor.canDrop(),
+  isDraggingOver: monitor.isOver(/*{ shallow: true }*/),
 }))
 
 const connectDrag = DragSource(LIST_TYPE, dragSpec, (connect, monitor) => ({
