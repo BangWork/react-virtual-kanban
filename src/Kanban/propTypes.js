@@ -19,3 +19,5 @@ export const scrollToList = PropTypes.number;
 export const scrollToAlignment = PropTypes.string;
 export const itemCacheKey = PropTypes.func;
 export const defaultCardHeight = PropTypes.number;
+export const canDropRow = PropTypes.func;
+export const canDropList = PropTypes.func;

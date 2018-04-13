@@ -49,6 +49,8 @@ class Kanban extends PureComponent {
     onDragEndList: () => {},
     onDragBeginRow: () => {},
     onDragEndRow: () => {},
+    canDropRow: () => true,
+    canDropList: () => true,
     overscanListCount: 2,
     overscanRowCount: 2,
     itemCacheKey: ({ id }) => `${id}`,
@@ -234,6 +236,8 @@ class Kanban extends PureComponent {
         itemCacheKey={this.props.itemCacheKey}
         findItemIndex={this.findItemIndex}
         defaultCardHeight={this.props.defaultCardHeight}
+        canDropRow={this.props.canDropRow}
+        canDropList={this.props.canDropList}
       />
     );
   }

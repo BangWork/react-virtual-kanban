@@ -50,11 +50,23 @@ export function canDrop(props, monitor) {
   const itemType = monitor.getItemType();
 
   if (itemType === LIST_TYPE) {
-    return true;
+    return props.canDropList({
+      source: item,
+      target: {
+        listId: props.listId,
+        list: props.list,
+      }
+    });
   }
 
   if (itemType === ROW_TYPE) {
-    return item.listId !== props.listId;
+    return props.canDropRow({
+      source: item,
+      target: {
+        listId: props.listId,
+        list: props.list,
+      },
+    });
   }
 }
 
