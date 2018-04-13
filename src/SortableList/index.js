@@ -57,7 +57,7 @@ class SortableList extends PureComponent {
   }
 
   keyMapper = (rowIndex) => {
-    const row = this.props.list[rowIndex]; 
+    const row = this.props.list.rows[rowIndex]; 
     return this.props.itemCacheKey(row);
   }
 
