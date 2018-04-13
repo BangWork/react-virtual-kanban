@@ -10,12 +10,6 @@ import * as propTypes from './propTypes';
 class SortableItem extends React.PureComponent {
   static propTypes = propTypes;
 
-  componentDidMount() {
-    this.props.connectDragPreview(getEmptyImage(), {
-      captureDraggingState: true
-    });
-  }
-
   render() {
     const {
       row,
@@ -25,15 +19,17 @@ class SortableItem extends React.PureComponent {
       isDragging,
       connectDragSource,
       connectDropTarget,
+      connectDragPreview,
       rowStyle,
       measure,
     } = this.props;
 
     const itemProps = {
       row, rowId, listId, rowStyle, isDragging, 
-      connectDropTarget, connectDragSource,
-      measure,
+      connectDropTarget, connectDragSource, connectDragPreview,
+      measure, 
     };
+
     return itemRenderer(itemProps);
   }
 }

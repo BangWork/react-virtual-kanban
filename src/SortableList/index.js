@@ -41,11 +41,6 @@ class SortableList extends PureComponent {
     });  
   }
   
-  componentDidMount() {
-    this.props.connectDragPreview(getEmptyImage(), {
-      captureDraggingState: true
-    });
-  }
   componentWillReceiveProps(nextProps) {
     // todo if defaultCardHeight change, recreate cache.
   }
@@ -141,6 +136,7 @@ class SortableList extends PureComponent {
       canDrop,
       connectDragSource,
       connectDropTarget,
+      connectDragPreview,
       listStyle,
     } = this.props;
 
@@ -148,7 +144,8 @@ class SortableList extends PureComponent {
       {(dimensions) => this.renderList(dimensions)}
     </AutoSizer>);
     const listProps = {
-      list, listId, listStyle, connectDragSource, connectDropTarget,
+      list, listId, listStyle, 
+      connectDragSource, connectDropTarget, connectDragPreview,
       isDragging,
       isDraggingOver,
       canDrop,

@@ -1,6 +1,7 @@
 import React from 'react';
 import HTML5Backend from 'react-dnd-html5-backend';
 import withScrolling, { createHorizontalStrength } from 'react-dnd-scrollzone';
+import { DragDropContext } from 'react-dnd';
 import { Grid } from 'react-virtualized';
 import scrollbarSize from 'dom-helpers/util/scrollbarSize';
 
@@ -14,23 +15,14 @@ import {
 
 import * as propTypes from './propTypes';
 import * as decorators from '../decorators';
-import DragLayer from '../DragLayer';
+// import DragLayer from '../DragLayer';
 import SortableList from '../SortableList';
 
 const GridWithScrollZone = withScrolling(Grid);
 const horizontalStrength = createHorizontalStrength(200);
-import { DragDropManager } from 'dnd-core';
+// import { DragDropManager } from 'dnd-core';
 
 import PureComponent from '../PureComponent';
-
-/**
- * Grab dragDropManager from context
- *
- * More info: https://github.com/gaearon/react-dnd/issues/186
- */
-const getDndContext = ((dragDropManager = new DragDropManager(HTML5Backend)) => (context) => (
-  context.dragDropManager || dragDropManager
-))();
 
 class Kanban extends PureComponent {
   static propTypes = propTypes;
@@ -56,14 +48,6 @@ class Kanban extends PureComponent {
     itemCacheKey: ({ id }) => `${id}`,
   }
 
-  static childContextTypes = {
-    dragDropManager: React.PropTypes.object,
-  }
-
-  static contextTypes = {
-    dragDropManager: React.PropTypes.object,
-  }
-
   constructor(props) {
     super(props);
 
@@ -86,11 +70,6 @@ class Kanban extends PureComponent {
     this.findItemIndex = this.findItemIndex.bind(this);
   }
 
-  getChildContext() {
-    return {
-      dragDropManager: getDndContext(this.context),
-    };
-  }
 
   componentWillReceiveProps(nextProps) {
     this.setState({ lists: nextProps.lists });
@@ -252,14 +231,14 @@ class Kanban extends PureComponent {
           verticalStrength={() => {}}
           speed={100}
         />
-        <DragLayer
+        {/* <DragLayer
           lists={lists}
           itemPreviewRenderer={itemPreviewRenderer}
           listPreviewRenderer={listPreviewRenderer}
-        />
+        /> */}
       </div>
     );
   }
 }
 
-export default Kanban;
+export default DragDropContext(HTML5Backend)(Kanban);
