@@ -233,6 +233,7 @@ class Kanban extends PureComponent {
         overscanRowCount={this.props.overscanRowCount}
         itemCacheKey={this.props.itemCacheKey}
         findItemIndex={this.findItemIndex}
+        defaultCardHeight={this.props.defaultCardHeight}
       />
     );
   }

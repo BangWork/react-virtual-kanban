@@ -37,7 +37,7 @@ class SortableList extends PureComponent {
     this.measureCache = new CellMeasurerCache({
       defaultHeight: props.defaultCardHeight,
       fixedWidth: true,
-      keyMapper: this.keyMapper,
+      // keyMapper: this.keyMapper,
     });  
   }
   
@@ -123,6 +123,7 @@ class SortableList extends PureComponent {
       className='KanbanList'
       width={width}
       height={height}
+      deferredMeasurementCache={this.measureCache}
       rowHeight={this.measureCache.rowHeight}
       rowCount={this.props.list.rows.length}
       rowRenderer={this.renderRow}
@@ -136,6 +137,7 @@ class SortableList extends PureComponent {
       listId,
       listRenderer,
       isDragging,
+      isDraggingOver,
       connectDragSource,
       connectDropTarget,
       listStyle,
@@ -145,15 +147,17 @@ class SortableList extends PureComponent {
       {(dimensions) => this.renderList(dimensions)}
     </AutoSizer>);
     const listProps = {
-      list, listId, listStyle, isDragging, connectDragSource, connectDropTarget,
+      list, listId, listStyle, isDragging, isDraggingOver,
+      connectDragSource, connectDropTarget,
       children,
     };
     return listRenderer(listProps);
   }
 }
 
-const connectDrop = DropTarget([LIST_TYPE, ROW_TYPE], dropSpec, connect => ({
+const connectDrop = DropTarget([LIST_TYPE, ROW_TYPE], dropSpec, (connect, monitor) => ({
   connectDropTarget: connect.dropTarget(),
+  isDraggingOver: monitor.isOver({ shallow: true }),
 }))
 
 const connectDrag = DragSource(LIST_TYPE, dragSpec, (connect, monitor) => ({

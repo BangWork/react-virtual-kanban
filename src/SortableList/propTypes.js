@@ -16,6 +16,7 @@ export const itemCacheKey = PropTypes.func;
 export const defaultCardHeight = PropTypes.number;
   // React DnD
 export const isDragging = PropTypes.bool;
+export const isDraggingOver = PropTypes.bool;
 export const connectDropTarget = PropTypes.func;
 export const connectDragSource = PropTypes.func;
 export const connectDragPreview = PropTypes.func;
