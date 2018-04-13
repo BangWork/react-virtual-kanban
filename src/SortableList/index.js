@@ -37,7 +37,7 @@ class SortableList extends PureComponent {
     this.measureCache = new CellMeasurerCache({
       defaultHeight: props.defaultCardHeight,
       fixedWidth: true,
-      keyMapper: this.keyMapper,
+      // keyMapper: this.keyMapper,
     });  
   }
   
