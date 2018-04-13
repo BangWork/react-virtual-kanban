@@ -179,7 +179,9 @@ function moveItemToList(lists, { fromId, toId }) {
   });
 }
 
-export function updateLists(lists, { from, to }) {
+export function updateLists(lists, params) {
+  console.log('updateLists():params: ' + params);
+  const { from, to } = params;
   const { itemId: fromItemId, listId: fromListId } = from;
   const { itemId: toItemId, listId: toListId } = to;
 

@@ -69,10 +69,6 @@ class SortableList extends PureComponent {
     return callWithListInfo(this.props.dragEndRow, params, this.props);
   }
 
-  onMoveRow=(params)=>{
-    return callWithListInfo(this.props.moveRow, params, this.props);
-  }
-
   onDropRow=(params)=>{
     return callWithListInfo(this.props.dropRow, params, this.props);
   }
@@ -94,7 +90,7 @@ class SortableList extends PureComponent {
         listId={this.props.listId}
         rowStyle={style}
         itemRenderer={this.props.itemRenderer}
-        moveRow={this.onMoveRow}
+        moveRow={this.props.onMoveRow}
         dropRow={this.onDropRow}
         dragBeginRow={this.onDragBeginRow}
         dragEndRow={this.onDragEndRow}
