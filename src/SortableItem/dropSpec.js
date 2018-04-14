@@ -3,7 +3,7 @@ import { width } from 'dom-helpers/query';
 
 export function hover(props, monitor, component) {
   const item = monitor.getItem();
-  if(!canDrop(props, monitor)) return;
+  if (!monitor.canDrop()) return;
 
   const { rowId: dragItemId } = item;
   const { rowId: hoverItemId, findItemIndex } = props;

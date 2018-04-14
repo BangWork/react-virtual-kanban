@@ -1,6 +1,6 @@
 import React from 'react';
 import HTML5Backend from 'react-dnd-html5-backend';
-import withScrolling, { createHorizontalStrength } from 'react-dnd-scrollzone';
+import withScrolling, { createHorizontalStrength, createVerticalStrength } from 'react-dnd-scrollzone';
 import { DragDropContext } from 'react-dnd';
 import { Grid } from 'react-virtualized';
 import scrollbarSize from 'dom-helpers/util/scrollbarSize';
@@ -19,7 +19,7 @@ import * as decorators from '../decorators';
 import SortableList from '../SortableList';
 
 const GridWithScrollZone = withScrolling(Grid);
-const horizontalStrength = createHorizontalStrength(200);
+
 // import { DragDropManager } from 'dnd-core';
 
 import PureComponent from '../PureComponent';
@@ -55,6 +55,9 @@ class Kanban extends PureComponent {
       lists: props.lists
     };
 
+    this.horizontalStrength = createHorizontalStrength(200);
+    this.verticalStrength = () => {};
+
     this.onMoveList = this.onMoveList.bind(this);
     this.onMoveRow = this.onMoveRow.bind(this);
 
@@ -68,6 +71,7 @@ class Kanban extends PureComponent {
 
     this.renderList = this.renderList.bind(this);
     this.findItemIndex = this.findItemIndex.bind(this);
+    this.findListIndex = this.findListIndex.bind(this);
   }
 
 
@@ -167,6 +171,10 @@ class Kanban extends PureComponent {
     return findItemIndex(this.state.lists, itemId);
   }
 
+  findListIndex(listId) {
+    return findListIndex(this.state.lists, listId);
+  }
+
   renderList({ columnIndex, key, style }) {
     const list = this.state.lists[columnIndex];
 
@@ -189,6 +197,7 @@ class Kanban extends PureComponent {
         overscanRowCount={this.props.overscanRowCount}
         itemCacheKey={this.props.itemCacheKey}
         findItemIndex={this.findItemIndex}
+        findListIndex={this.findListIndex}
         defaultCardHeight={this.props.defaultCardHeight}
         canDropRow={this.props.canDropRow}
         canDropList={this.props.canDropList}
@@ -225,10 +234,10 @@ class Kanban extends PureComponent {
           rowCount={1}
           cellRenderer={this.renderList}
           overscanColumnCount={overscanListCount}
-          horizontalStrength={horizontalStrength}
+          horizontalStrength={this.horizontalStrength}
+          // verticalStrength={this.verticalStrength}
           scrollToColumn={scrollToList}
           scrollToAlignment={scrollToAlignment}
-          verticalStrength={() => {}}
           speed={100}
         />
         {/* <DragLayer

@@ -2,6 +2,7 @@ import React from 'react';
 import { List, CellMeasurer, CellMeasurerCache, AutoSizer } from 'react-virtualized';
 import { DragSource, DropTarget } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
+import withScrolling, { createVerticalStrength } from 'react-dnd-scrollzone';
 
 // import { ItemCache } from './itemCache';
 import SortableItem from '../SortableItem';
@@ -12,6 +13,8 @@ import * as dropSpec from './dropSpec';
 import * as propTypes from './propTypes';
 
 import PureComponent from '../PureComponent';
+const AutoScrollList = withScrolling(List);
+
 
 // const identity = (c) => c;
 function callWithListInfo(func,params, props){
@@ -35,6 +38,7 @@ class SortableList extends PureComponent {
     this.renderRow = this.renderRow.bind(this);
     this.renderList = this.renderList.bind(this);
 
+    this.verticalStrength = createVerticalStrength(props.defaultCardHeight);
     this.measureCache = new CellMeasurerCache({
       defaultHeight: props.defaultCardHeight,
       fixedWidth: true,
@@ -48,7 +52,7 @@ class SortableList extends PureComponent {
 
   componentDidUpdate(prevProps) {
     if (prevProps.list.rows !== this.props.list.rows && !!this._list) {
-      this._list.recomputeRowHeights();
+      this._list.wrappedInstance.recomputeRowHeights();
     }
   }
 
@@ -116,7 +120,7 @@ class SortableList extends PureComponent {
   renderList({ width, height }) {
     // TODO: Check whether scrollbar is visible or not :/
 
-    return <List
+    return <AutoScrollList
       ref={(c) => (this._list = c)}
       className='KanbanList'
       width={width}
@@ -126,6 +130,7 @@ class SortableList extends PureComponent {
       rowCount={this.props.list.rows.length}
       rowRenderer={this.renderRow}
       overscanRowCount={this.props.overscanRowCount}
+      verticalStrength={this.verticalStrength}
     />
   }
 

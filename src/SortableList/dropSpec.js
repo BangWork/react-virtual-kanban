@@ -21,26 +21,61 @@ export function hover(props, monitor, component) {
   const item = monitor.getItem();
   const itemType = monitor.getItemType();
   const { listId: dragListId } = item;
-  const { listId: hoverListId } = props;
+  const { listId: hoverListId, findListIndex } = props;
 
   if (dragListId === hoverListId) {
     return;
   }
 
   if (itemType === LIST_TYPE) {
+      // Sometimes component may be null when it's been unmounted
+    if (!component) {
+      console.warn(`null component for #${dragListId}`);
+      return;
+    }
+
+    const dragListIndex = findListIndex(dragListId);
+    const hoverListIndex = findListIndex(hoverListId);
+
+    // In order to avoid swap flickering when dragging element is smaller than
+    // dropping one, we check whether dropping middle has been reached or not.
+
+    // Determine rectangle on screen
+    const node = findDOMNode(component);
+    const hoverBoundingRect = node.getBoundingClientRect();
+
+      // Get vertical middle
+    const hoverMiddleX = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
+
+    // Determine mouse position
+    const clientOffset = monitor.getClientOffset();
+
+    // Get pixels to the top
+    const hoverClientX = clientOffset.x - hoverBoundingRect.left;
+
+    // Dragging downwards
+    if (dragListIndex < hoverListIndex && hoverClientX < hoverMiddleX) {
+      return;
+    }
+
+    // Dragging upwards
+    if (dragListIndex > hoverListIndex && hoverClientX > hoverMiddleX) {
+      return;
+    }
+
     props.moveList({listId: dragListId}, {listId: hoverListId});
     return;
   }
 
   if (itemType === ROW_TYPE) {
-    const dragItemId = item.rowId;
+    // const dragItemId = item.rowId;
 
-    item.containerWidth = calculateContainerWidth(component) || item.containerWidth;
+    // item.containerWidth = calculateContainerWidth(component) || item.containerWidth;
 
-    props.moveRow(
-      {itemId: dragItemId},
-      {listId: hoverListId}
-    );
+    // props.moveRow(
+    //   {itemId: dragItemId},
+    //   {listId: hoverListId}
+    // );
     return;
   }
 }
@@ -60,13 +95,14 @@ export function canDrop(props, monitor) {
   }
 
   if (itemType === ROW_TYPE) {
-    return props.canDropRow({
-      source: item,
-      target: {
-        listId: props.listId,
-        list: props.list,
-      },
-    });
+    return false;
+    // return props.canDropRow({
+    //   source: item,
+    //   target: {
+    //     listId: props.listId,
+    //     list: props.list,
+    //   },
+    // });
   }
 }
 
