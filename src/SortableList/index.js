@@ -26,6 +26,7 @@ class SortableList extends PureComponent {
   static propTypes = propTypes;
   static defaultProps = {
     defaultCardHeight: 60,
+    canDropRow: () => true,
   }
 
   constructor(props) {
@@ -83,6 +84,7 @@ class SortableList extends PureComponent {
         row={row}
         rowId={row.id}
         listId={this.props.listId}
+        list={this.props.list}
         rowStyle={style}
         itemRenderer={this.props.itemRenderer}
         moveRow={this.props.moveRow}
@@ -90,6 +92,7 @@ class SortableList extends PureComponent {
         dragBeginRow={this.onDragBeginRow}
         dragEndRow={this.onDragEndRow}
         findItemIndex={this.props.findItemIndex}
+        canDropRow={this.props.canDropRow}
         measure={measure}
       />)}
     </CellMeasurer>);
