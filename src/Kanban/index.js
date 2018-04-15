@@ -178,10 +178,10 @@ class Kanban extends PureComponent {
 
   lastMoveListInfo = {};
   onMoveList(from, to) {
-    // if(this.isScrolling) {
-    //   console.log('is isScrolling, ignore');
-    //   return; 
-    // }
+    if(this.isScrolling) {
+      console.log('is isScrolling, ignore');
+      return; 
+    }
 
     // if( this.lastMoveListInfo.lists === this.props.lists
     //   && this.lastMoveListInfo.fromListId === from.listId
