@@ -167,6 +167,8 @@ const connectDrop = DropTarget([LIST_TYPE, ROW_TYPE], dropSpec, (connect, monito
   connectDropTarget: connect.dropTarget(),
   canDrop: monitor.canDrop(),
   isDraggingOver: monitor.isOver(/*{ shallow: true }*/),
+  isDraggingListOver: monitor.isOver() && monitor.getItemType() === LIST_TYPE,
+  isDraggingRowOver: monitor.isOver() && monitor.getItemType() === ROW_TYPE,
 }))
 
 const connectDrag = DragSource(LIST_TYPE, dragSpec, (connect, monitor) => ({
