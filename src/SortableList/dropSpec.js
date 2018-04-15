@@ -34,34 +34,45 @@ export function hover(props, monitor, component) {
       return;
     }
 
-    const dragListIndex = findListIndex(dragListId);
-    const hoverListIndex = findListIndex(hoverListId);
+    // const dragListIndex = findListIndex(dragListId);
+    // const hoverListIndex = findListIndex(hoverListId);
 
-    // In order to avoid swap flickering when dragging element is smaller than
-    // dropping one, we check whether dropping middle has been reached or not.
+    // // In order to avoid swap flickering when dragging element is smaller than
+    // // dropping one, we check whether dropping middle has been reached or not.
 
-    // Determine rectangle on screen
-    const node = findDOMNode(component);
-    const hoverBoundingRect = node.getBoundingClientRect();
+    // // Determine rectangle on screen
+    // const node = findDOMNode(component);
+    // const hoverBoundingRect = node.getBoundingClientRect();
 
-      // Get vertical middle
-    const hoverMiddleX = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
+    //   // Get vertical middle
+    // const hoverMiddleX = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
 
-    // Determine mouse position
-    const clientOffset = monitor.getClientOffset();
+    // // Determine mouse position
+    // const clientOffset = monitor.getClientOffset();
 
-    // Get pixels to the top
-    const hoverClientX = clientOffset.x - hoverBoundingRect.left;
+    // // Get pixels to the top
+    // const hoverClientX = clientOffset.x - hoverBoundingRect.left;
+        
+    // // console.log(
+    // //   'clientOffset: ',  clientOffset,  '\n', 
+    // //   'hoverBoundingRect: ', hoverBoundingRect, '\n',
+    // //   'dragListId: ' + dragListId + '\n'
+    // //   + 'dragListIndex: ' + dragListIndex + '\n'
+    // //   + 'hoverListId: ' + hoverListId + '\n'
+    // //   + 'hoverListIndex: ' + hoverListIndex + '\n'
+    // // );
 
-    // Dragging downwards
-    if (dragListIndex < hoverListIndex && hoverClientX < hoverMiddleX) {
-      return;
-    }
+    // // Dragging rightwards
+    // if (dragListIndex < hoverListIndex && hoverClientX < hoverMiddleX) {
+    //   // console.log('mouse need move left move')
+    //   return;
+    // }
 
-    // Dragging upwards
-    if (dragListIndex > hoverListIndex && hoverClientX > hoverMiddleX) {
-      return;
-    }
+    // // Dragging leftwards
+    // if (dragListIndex > hoverListIndex && hoverClientX > hoverMiddleX) {
+    //   // console.log('mouse need move left move')
+    //   return;
+    // }
 
     props.moveList({listId: dragListId}, {listId: hoverListId});
     return;

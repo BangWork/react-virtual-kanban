@@ -4,6 +4,8 @@ import withScrolling, { createHorizontalStrength, createVerticalStrength } from 
 import { DragDropContext } from 'react-dnd';
 import { Grid } from 'react-virtualized';
 import scrollbarSize from 'dom-helpers/util/scrollbarSize';
+import isEqualWith from 'lodash/isEqualWith';
+import has from 'lodash/has';
 
 import {
   updateLists,
@@ -24,6 +26,11 @@ const GridWithScrollZone = withScrolling(Grid);
 
 import PureComponent from '../PureComponent';
 
+function listIdEqualCustomer(a,b){
+  if( has(a, 'id') && has(a, 'rows') && has(b, 'id') ){
+    return a.id === b.id
+  }
+}
 class Kanban extends PureComponent {
   static propTypes = propTypes;
 
@@ -55,6 +62,7 @@ class Kanban extends PureComponent {
       lists: props.lists
     };
 
+    this.isDraggingList = false;
     this.horizontalStrength = createHorizontalStrength(200);
     this.verticalStrength = () => {};
 
@@ -72,16 +80,126 @@ class Kanban extends PureComponent {
     this.renderList = this.renderList.bind(this);
     this.findItemIndex = this.findItemIndex.bind(this);
     this.findListIndex = this.findListIndex.bind(this);
+    this.onScrollChange = this.onScrollChange.bind(this);
   }
-
-
+  
+  tempState = null;
   componentWillReceiveProps(nextProps) {
-    this.setState({ lists: nextProps.lists });
+    if( this.isDraggingList ){
+      let listIdsChanged = !isEqualWith(this.props.lists, nextProps.lists, listIdEqualCustomer);
+      if( listIdsChanged ){
+        console.warn('dont change list ids while dragging list. Unexpected consequences may happen.')
+        this.tempState = { lists: nextProps.lists };
+      } else {
+        // 在拖拽列表过程中，允许改变列表内的卡片位置，但不改变列表之间的位置。
+        const stateLists = this.state.lists;
+        const propsLists = nextProps.lists;
+        const newLists = [];
+
+        // 这里对 state.lists 更新了 rows，但保持了 state.lists 中 listId 的顺序不变。
+        for( let i = 0 ; i< stateLists.length ; i ++ ){
+          const list = stateLists[i];
+          const listId = list.id;
+          // 因为 listIdsChanged == false，所以，这里的 propsList 一定存在。
+          const propsList = propsLists.find( ({id}) => id === listId );
+          newLists[i] = { ...list, rows: propsList.rows };
+        }
+        this.setState({ lists: newLists });
+        this.tempState = { lists: nextProps.lists };
+      }
+    }else{
+      this.setState({ lists: nextProps.lists });
+    }
   }
 
+  componentDidUpdate(_prevProps, prevState) {
+    if (prevState.lists !== this.state.lists) {
+      this._grid.wrappedInstance.forceUpdate();
+    }
+  }
+
+  componentWillUnmount(){
+    this.endScrollCheckTimer();
+  }
+
+  itemEndData({ itemId }) {
+    const lists = this.state.lists;
+
+    return {
+      itemId,
+      get rowId() {
+        console.log('onDropRow: `rowId` is deprecated. Use `itemId` instead');
+        return itemId;
+      },
+      listId: findItemListId(lists, itemId),
+      rowIndex: findItemIndex(lists, itemId),
+      listIndex: findItemListIndex(lists, itemId),
+      lists,
+    }
+  }
+
+  listEndData({ listId }) {
+    const lists = this.state.lists;
+
+    return {
+      listId,
+      listIndex: findListIndex(lists, listId),
+      lists,
+    };
+  }
+
+  findItemIndex(itemId) {
+    return findItemIndex(this.state.lists, itemId);
+  }
+
+  findListIndex(listId) {
+    return findListIndex(this.state.lists, listId);
+  }
+
+  scrollCheckTimerId = 0;
+  startScrollCheckTimer(){
+    if(!this.scrollCheckTimerId){
+      this.scrollCheckTimerId = setInterval(() => {
+        if(!this.hasScrollChanged ){
+          this.endScrollCheckTimer();
+          this.isScrolling = false;
+          console.log('set isScrolling false');
+        }
+        this.hasScrollChanged = false;
+      }, 500);
+    }
+  }
+  endScrollCheckTimer(){
+    if(this.scrollCheckTimerId){
+      clearInterval(this.scrollCheckTimerId);
+      this.scrollCheckTimerId = 0;
+    }
+  }
+
+  lastMoveListInfo = {};
   onMoveList(from, to) {
+    // if(this.isScrolling) {
+    //   console.log('is isScrolling, ignore');
+    //   return; 
+    // }
+
+    // if( this.lastMoveListInfo.lists === this.props.lists
+    //   && this.lastMoveListInfo.fromListId === from.listId
+    //   && this.lastMoveListInfo.toListId === to.listId
+    // ){
+    //   console.log('same move, ignore ');
+    //   return;
+    // }
+    // this.lastMoveListInfo = {
+    //   lists: this.props.lists,
+    //   fromListId: from.listId,
+    //   toListId: to.listId,
+    // };
+    // console.log('do move. from:', from, 'to:',to);
+
+    const newLists = updateLists(this.state.lists, {from, to});
     this.setState(
-      { lists: updateLists(this.state.lists, {from, to}) },
+      { lists: newLists },
       () => {
         const lists = this.state.lists;
 
@@ -115,32 +233,6 @@ class Kanban extends PureComponent {
     this.props.onDropList(this.listEndData({ listId }));
   }
 
-  itemEndData({ itemId }) {
-    const lists = this.state.lists;
-
-    return {
-      itemId,
-      get rowId() {
-        console.warn('onDropRow: `rowId` is deprecated. Use `itemId` instead');
-        return itemId;
-      },
-      listId: findItemListId(lists, itemId),
-      rowIndex: findItemIndex(lists, itemId),
-      listIndex: findItemListIndex(lists, itemId),
-      lists,
-    }
-  }
-
-  listEndData({ listId }) {
-    const lists = this.state.lists;
-
-    return {
-      listId,
-      listIndex: findListIndex(lists, listId),
-      lists,
-    };
-  }
-
   onDropRow({ itemId }) {
     this.props.onDropRow(this.itemEndData({ itemId }));
   }
@@ -154,26 +246,36 @@ class Kanban extends PureComponent {
   }
 
   onDragBeginList(data) {
+    this.isDraggingList = true;
     this.props.onDragBeginList(data);
+    // 这里回调 onDragBeginList 后，上层组件一定会重新设置 props，所以不用再把 tempState 设置回去了。
+    // 如果上层组件不理会这个回掉，则状态会一直维持当前状态，效果也不差。
+    // if( !this.tempState ){
+    //   this.setState(this.tempState);
+    //   this.tempState = null;
+    // }
   }
 
   onDragEndList({ listId }) {
+    this.isDraggingList = false;
     this.props.onDragEndList(this.listEndData({ listId }));
   }
 
-  componentDidUpdate(_prevProps, prevState) {
-    if (prevState.lists !== this.state.lists) {
-      this._grid.wrappedInstance.forceUpdate();
-    }
+
+  prevScrollLeft = 0;
+  hasScrollChanged = false;
+  onScrollChange(scrollLeft){
+    // if( scrollLeft !== this.prevScrollLeft){
+    //   console.log('set isScrolling true');
+    //   this.isScrolling = true;
+    //   this.hasScrollChanged = true;
+    //   this.prevScrollLeft = scrollLeft;
+    //   this.startScrollCheckTimer();
+    // }
   }
 
-  findItemIndex(itemId) {
-    return findItemIndex(this.state.lists, itemId);
-  }
-
-  findListIndex(listId) {
-    return findListIndex(this.state.lists, listId);
-  }
+  
+  
 
   renderList({ columnIndex, key, style }) {
     const list = this.state.lists[columnIndex];
@@ -235,16 +337,13 @@ class Kanban extends PureComponent {
           cellRenderer={this.renderList}
           overscanColumnCount={overscanListCount}
           horizontalStrength={this.horizontalStrength}
+          strengthMultiplier={5}
           // verticalStrength={this.verticalStrength}
           scrollToColumn={scrollToList}
           scrollToAlignment={scrollToAlignment}
           speed={100}
+          onScrollChange={this.onScrollChange}
         />
-        {/* <DragLayer
-          lists={lists}
-          itemPreviewRenderer={itemPreviewRenderer}
-          listPreviewRenderer={listPreviewRenderer}
-        /> */}
       </div>
     );
   }
