@@ -21,7 +21,7 @@ export function hover(props, monitor, component) {
   const item = monitor.getItem();
   const itemType = monitor.getItemType();
   const { listId: dragListId } = item;
-  const { listId: hoverListId, findListIndex } = props;
+  const { listId: hoverListId } = props;
 
   if (dragListId === hoverListId) {
     return;
@@ -34,59 +34,19 @@ export function hover(props, monitor, component) {
       return;
     }
 
-    // const dragListIndex = findListIndex(dragListId);
-    // const hoverListIndex = findListIndex(hoverListId);
-
-    // // In order to avoid swap flickering when dragging element is smaller than
-    // // dropping one, we check whether dropping middle has been reached or not.
-
-    // // Determine rectangle on screen
-    // const node = findDOMNode(component);
-    // const hoverBoundingRect = node.getBoundingClientRect();
-
-    //   // Get vertical middle
-    // const hoverMiddleX = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
-
-    // // Determine mouse position
-    // const clientOffset = monitor.getClientOffset();
-
-    // // Get pixels to the top
-    // const hoverClientX = clientOffset.x - hoverBoundingRect.left;
-        
-    // // console.log(
-    // //   'clientOffset: ',  clientOffset,  '\n', 
-    // //   'hoverBoundingRect: ', hoverBoundingRect, '\n',
-    // //   'dragListId: ' + dragListId + '\n'
-    // //   + 'dragListIndex: ' + dragListIndex + '\n'
-    // //   + 'hoverListId: ' + hoverListId + '\n'
-    // //   + 'hoverListIndex: ' + hoverListIndex + '\n'
-    // // );
-
-    // // Dragging rightwards
-    // if (dragListIndex < hoverListIndex && hoverClientX < hoverMiddleX) {
-    //   // console.log('mouse need move left move')
-    //   return;
-    // }
-
-    // // Dragging leftwards
-    // if (dragListIndex > hoverListIndex && hoverClientX > hoverMiddleX) {
-    //   // console.log('mouse need move left move')
-    //   return;
-    // }
-
     props.moveList({listId: dragListId}, {listId: hoverListId});
     return;
   }
 
   if (itemType === ROW_TYPE) {
-    // const dragItemId = item.rowId;
+    const dragItemId = item.rowId;
 
-    // item.containerWidth = calculateContainerWidth(component) || item.containerWidth;
+    item.containerWidth = calculateContainerWidth(component) || item.containerWidth;
 
-    // props.moveRow(
-    //   {itemId: dragItemId},
-    //   {listId: hoverListId}
-    // );
+    props.moveRow(
+      {itemId: dragItemId},
+      {listId: hoverListId}
+    );
     return;
   }
 }
@@ -106,14 +66,14 @@ export function canDrop(props, monitor) {
   }
 
   if (itemType === ROW_TYPE) {
-    return false;
-    // return props.canDropRow({
-    //   source: item,
-    //   target: {
-    //     listId: props.listId,
-    //     list: props.list,
-    //   },
-    // });
+    return item.listId !== props.listId 
+      && props.canDropRow({
+        source: item,
+        target: {
+          listId: props.listId,
+          list: props.list,
+        },
+      });
   }
 }
 

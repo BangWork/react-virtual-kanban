@@ -213,6 +213,7 @@ class Kanban extends PureComponent {
   }
 
   onMoveRow(from, to) {
+    // console.log('onMoveRow(). from = ', from, ', to = ', to);
     this.setState(
       {lists: updateLists(this.state.lists, {from, to})},
       () => {
