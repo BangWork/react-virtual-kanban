@@ -17,7 +17,7 @@ import {
 
 import * as propTypes from './propTypes';
 import * as decorators from '../decorators';
-// import DragLayer from '../DragLayer';
+import DragLayer from '../DragLayer';
 import SortableList from '../SortableList';
 
 const GridWithScrollZone = withScrolling(Grid);
@@ -344,6 +344,11 @@ class Kanban extends PureComponent {
           scrollToAlignment={scrollToAlignment}
           speed={100}
           onScrollChange={this.onScrollChange}
+        />
+        <DragLayer
+          lists={lists}
+          itemPreviewRenderer={itemPreviewRenderer}
+          listPreviewRenderer={listPreviewRenderer}
         />
       </div>
     );

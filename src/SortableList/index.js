@@ -46,6 +46,12 @@ class SortableList extends PureComponent {
     });  
   }
   
+  componentDidMount() {
+    this.props.connectDragPreview(getEmptyImage(), {
+      captureDraggingState: true
+    });
+  }
+
   componentWillReceiveProps(nextProps) {
     // todo if defaultCardHeight change, recreate cache.
   }
