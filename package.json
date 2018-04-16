@@ -92,11 +92,11 @@
     "classnames": "2.2.5",
     "dnd-core": "^2.2.3",
     "dom-helpers": "^2.4.0",
-    "lodash": "^4.17.5",
     "react-addons-update": "15.4.1",
     "react-dnd": "2.6.0",
     "react-dnd-html5-backend": "2.1.2",
     "react-dnd-scrollzone": "3.1.0",
+    "memoizee": "0.4.11",
     "react-virtualized": "9.7.6"
   },
   "peerDependencies": {
@@ -106,8 +106,8 @@
   },
   "scripts": {
     "build:clean": "rm -rf ./lib ./dist",
-    "build:lib": "NODE_ENV=production BABEL_ENV=commonjs babel src --out-dir lib --ignore src/demo/ --ignore src/**/__tests__",
-    "build:umd": "NODE_ENV=production webpack --config config/webpack.config.umd.js --bail",
+    "build:lib": "NODE_ENV=development BABEL_ENV=commonjs babel src --out-dir lib --ignore src/demo/ --ignore src/**/__tests__",
+    "build:umd": "NODE_ENV=development webpack --config config/webpack.config.umd.js --bail",
     "build:demo": "node ./scripts/build.js",
     "build:css": "postcss --use autoprefixer --use postcss-import src/styles.css > lib/styles.css",
     "build": "npm run build:clean && npm run build:umd && npm run build:lib && npm run build:css && npm run build:demo",

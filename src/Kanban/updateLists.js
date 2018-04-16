@@ -1,4 +1,5 @@
 import update from 'react-addons-update';
+import memoize from 'memoizee';
 
 function rotateRight(range, offset) {
   const length = range.length;
@@ -19,24 +20,26 @@ function buildUpdateOperation(list, { from, to }) {
   return [lower, rotated.length, ...rotated];
 }
 
-export function findListIndex(lists, listId) {
+export const findListIndex = memoize(function findListIndex(lists, listId) {
+  // console.log(`findListIndex(). listId = ${listId}`);
   return lists.findIndex(({ id }) => id === listId);
-}
+}, { max: 2 });
 
-export function findItemIndex(lists, itemId) {
+export const findItemIndex = memoize(function findItemIndex(lists, itemId) {
   let index = -1;
 
+  // console.log(`findItemIndex(). itemId = ${itemId}`);
   lists.forEach(({ rows }) => {
     if (index !== -1) return;
     index = rows.findIndex(({ id }) => id === itemId);
   });
 
   return index;
-}
+}, { max: 2 });
 
-export function findItemListIndex(lists, itemId) {
+export const findItemListIndex = memoize(function findItemListIndex(lists, itemId) {
   let index = -1;
-
+  // console.log(`findItemListIndex(). itemId = ${itemId}`);
   lists.forEach(({ rows }, i) => {
     if (index !== -1) return;
 
@@ -46,15 +49,16 @@ export function findItemListIndex(lists, itemId) {
   });
 
   return index;
-}
+}, { max: 2});
 
-export function findItemListId(lists, itemId) {
+export const findItemListId = memoize(function findItemListId(lists, itemId) {
+  // console.log(`findItemListId(). itemId = ${itemId}`);
   const list = lists.find(({ rows }) => {
     return rows.some(({ id }) => id === itemId);
   });
 
   return list && list.id;
-}
+}, { max: 2 });
 
 function moveLists(lists, { fromId, toId }) {
   const fromIndex = findListIndex(lists, fromId);
