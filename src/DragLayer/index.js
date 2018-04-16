@@ -47,14 +47,14 @@ class KanbanDragLayer extends PureComponent {
         rowId: item.rowId,
         rowStyle: item.rowStyle,
         containerWidth: item.containerWidth,
-        isGost:findItemIndex(lists, item.rowId) === -1,
+        // isGost:findItemIndex(lists, item.rowId) === -1,
       });
     case ItemTypes.LIST_TYPE:
       return listPreviewRenderer({
         list: item.list,
         listId: item.listId,
         listStyle: item.listStyle,
-        isGost: findListIndex(lists, item.listId) === -1,
+        // isGost: findListIndex(lists, item.listId) === -1,
       });
     default:
       return null;
