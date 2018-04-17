@@ -35,7 +35,6 @@ class KanbanDragLayer extends PureComponent {
 
   renderItem(type, item) {
     const {
-      lists,
       itemPreviewRenderer,
       listPreviewRenderer,
     } = this.props;
@@ -47,14 +46,12 @@ class KanbanDragLayer extends PureComponent {
         rowId: item.rowId,
         rowStyle: item.rowStyle,
         containerWidth: item.containerWidth,
-        // isGost:findItemIndex(lists, item.rowId) === -1,
       });
     case ItemTypes.LIST_TYPE:
       return listPreviewRenderer({
         list: item.list,
         listId: item.listId,
         listStyle: item.listStyle,
-        // isGost: findListIndex(lists, item.listId) === -1,
       });
     default:
       return null;

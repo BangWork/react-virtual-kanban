@@ -346,7 +346,6 @@ class Kanban extends PureComponent {
           onScrollChange={this.onScrollChange}
         />
         <DragLayer
-          lists={lists}
           itemPreviewRenderer={itemPreviewRenderer}
           listPreviewRenderer={listPreviewRenderer}
         />
