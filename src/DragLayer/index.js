@@ -67,7 +67,7 @@ class KanbanDragLayer extends PureComponent {
 
     return (
       <div className='KanbanDragLayer'>
-        <div style={getStyles(this.props)}>
+        <div className="KanbanDragLayerInnerWrapper" style={getStyles(this.props)}>
           {this.renderItem(itemType, item)}
         </div>
       </div>
