@@ -17,7 +17,7 @@ function getStyles({ currentOffset }) {
   }
 
   const { x, y } = currentOffset;
-  const transform = `translate(${x}px, ${y}px)`;
+  const transform = `translate3d(${x}px, ${y}px, 0)`;
 
   return {
     transform,
