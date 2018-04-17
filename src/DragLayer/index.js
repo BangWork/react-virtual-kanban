@@ -17,10 +17,13 @@ function getStyles({ currentOffset }) {
   }
 
   const { x, y } = currentOffset;
+  // use translate3d to make the dom render in a new layer.
+  // see https://aerotwist.com/blog/on-translate3d-and-layer-creation-hacks/
   const transform = `translate3d(${x}px, ${y}px, 0)`;
 
   return {
     transform,
+    display: 'inline-block', // to make the 3d layer smaller.
   };
 }
 
@@ -67,7 +70,7 @@ class KanbanDragLayer extends PureComponent {
 
     return (
       <div className='KanbanDragLayer'>
-        <div className="KanbanDragLayerInnerWrapper" style={getStyles(this.props)}>
+        <div style={getStyles(this.props)}>
           {this.renderItem(itemType, item)}
         </div>
       </div>
