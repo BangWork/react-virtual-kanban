@@ -80,7 +80,8 @@ class Kanban extends PureComponent {
     this.renderList = this.renderList.bind(this);
     this.findItemIndex = this.findItemIndex.bind(this);
     this.findListIndex = this.findListIndex.bind(this);
-    this.onScrollChange = this.onScrollChange.bind(this);
+    this.drawFrame = this.drawFrame.bind(this);
+    // this.onScrollChange = this.onScrollChange.bind(this);
   }
   
   tempState = null;
@@ -104,11 +105,11 @@ class Kanban extends PureComponent {
           const propsList = propsLists.find( ({id}) => id === listId );
           newLists[i] = { ...list, rows: propsList.rows };
         }
-        this.setState({ lists: newLists });
+        this.scheduleUpdate( () => ({ lists: newLists }));
         this.tempState = { lists: nextProps.lists };
       }
     }else{
-      this.setState({ lists: nextProps.lists });
+      this.scheduleUpdate( () => ({ lists: nextProps.lists }));
     }
   }
 
@@ -119,7 +120,28 @@ class Kanban extends PureComponent {
   }
 
   componentWillUnmount(){
-    this.endScrollCheckTimer();
+    // this.endScrollCheckTimer();
+    cancelAnimationFrame(this._requestedFrame);
+  }
+
+  scheduleUpdate(updateFn, callbackFn) {
+    this._pendingUpdateFn = updateFn;
+    this._pendingUpdateCallbackFn = callbackFn;
+
+    if (!this._requestedFrame) {
+      this._requestedFrame = requestAnimationFrame(this.drawFrame);
+    }
+  }
+
+  drawFrame() {
+    const nextState = this._pendingUpdateFn(this.state);
+    const callback = this._pendingUpdateCallbackFn;
+
+    this.setState(nextState, callback);
+
+    this._pendingUpdateFn = null;
+    this._pendingUpdateCallbackFn = null;
+    this._requestedFrame = null;
   }
 
   itemEndData({ itemId }) {
@@ -156,25 +178,25 @@ class Kanban extends PureComponent {
     return findListIndex(this.state.lists, listId);
   }
 
-  scrollCheckTimerId = 0;
-  startScrollCheckTimer(){
-    if(!this.scrollCheckTimerId){
-      this.scrollCheckTimerId = setInterval(() => {
-        if(!this.hasScrollChanged ){
-          this.endScrollCheckTimer();
-          this.isScrolling = false;
-          console.log('set isScrolling false');
-        }
-        this.hasScrollChanged = false;
-      }, 500);
-    }
-  }
-  endScrollCheckTimer(){
-    if(this.scrollCheckTimerId){
-      clearInterval(this.scrollCheckTimerId);
-      this.scrollCheckTimerId = 0;
-    }
-  }
+  // scrollCheckTimerId = 0;
+  // startScrollCheckTimer(){
+  //   if(!this.scrollCheckTimerId){
+  //     this.scrollCheckTimerId = setInterval(() => {
+  //       if(!this.hasScrollChanged ){
+  //         this.endScrollCheckTimer();
+  //         this.isScrolling = false;
+  //         console.log('set isScrolling false');
+  //       }
+  //       this.hasScrollChanged = false;
+  //     }, 500);
+  //   }
+  // }
+  // endScrollCheckTimer(){
+  //   if(this.scrollCheckTimerId){
+  //     clearInterval(this.scrollCheckTimerId);
+  //     this.scrollCheckTimerId = 0;
+  //   }
+  // }
 
   lastMoveListInfo = {};
   onMoveList(from, to) {
@@ -197,9 +219,9 @@ class Kanban extends PureComponent {
     // };
     // console.log('do move. from:', from, 'to:',to);
 
-    const newLists = updateLists(this.state.lists, {from, to});
-    this.setState(
-      { lists: newLists },
+    // const newLists = updateLists(this.state.lists, {from, to});
+    this.scheduleUpdate(
+      prevState => ({ lists: updateLists(prevState.lists, { from, to })}),
       () => {
         const lists = this.state.lists;
 
@@ -214,8 +236,8 @@ class Kanban extends PureComponent {
 
   onMoveRow(from, to) {
     // console.log('onMoveRow(). from = ', from, ', to = ', to);
-    this.setState(
-      {lists: updateLists(this.state.lists, {from, to})},
+    this.scheduleUpdate(
+      prevState => ({ lists: updateLists(prevState.lists, { from, to })}),
       () => {
           const lists = this.state.lists;
 
@@ -263,9 +285,9 @@ class Kanban extends PureComponent {
   }
 
 
-  prevScrollLeft = 0;
-  hasScrollChanged = false;
-  onScrollChange(scrollLeft){
+  // prevScrollLeft = 0;
+  // hasScrollChanged = false;
+  // onScrollChange(scrollLeft){
     // if( scrollLeft !== this.prevScrollLeft){
     //   console.log('set isScrolling true');
     //   this.isScrolling = true;
@@ -273,7 +295,7 @@ class Kanban extends PureComponent {
     //   this.prevScrollLeft = scrollLeft;
     //   this.startScrollCheckTimer();
     // }
-  }
+  // }
 
   
   
@@ -343,7 +365,7 @@ class Kanban extends PureComponent {
           scrollToColumn={scrollToList}
           scrollToAlignment={scrollToAlignment}
           speed={100}
-          onScrollChange={this.onScrollChange}
+          // onScrollChange={this.onScrollChange}
         />
         <DragLayer
           itemPreviewRenderer={itemPreviewRenderer}
