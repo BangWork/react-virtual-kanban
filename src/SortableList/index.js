@@ -3,6 +3,7 @@ import { List, CellMeasurer, CellMeasurerCache, AutoSizer } from 'react-virtuali
 import { DragSource, DropTarget } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import withScrolling, { createVerticalStrength } from 'react-dnd-scrollzone';
+import memoize from 'memoizee';
 
 // import { ItemCache } from './itemCache';
 import SortableItem from '../SortableItem';
@@ -36,7 +37,7 @@ class SortableList extends PureComponent {
     super(props);
 
     this.renderRow = this.renderRow.bind(this);
-    this.renderList = this.renderList.bind(this);
+    // this.renderList = this.renderList.bind(this);
 
     this.verticalStrength = createVerticalStrength(props.defaultCardHeight);
     this.measureCache = new CellMeasurerCache({
@@ -44,6 +45,33 @@ class SortableList extends PureComponent {
       fixedWidth: true,
       keyMapper: this.keyMapper,
     });  
+
+    const _this = this;
+    this.renderList = memoize((rowCount, overscanRowCount) => {
+      // TODO: Check whether scrollbar is visible or not :/
+      const listProps = {
+        ref: _this.onListRef,
+        className:'KanbanList',
+        deferredMeasurementCache: _this.measureCache,
+        rowHeight: _this.measureCache.rowHeight,
+        rowRenderer: _this.renderRow,
+        verticalStrength: _this.verticalStrength,
+        rowCount, overscanRowCount,
+      }
+  
+      return <AutoSizer>
+        { 
+          ({width, height}) => {
+            // console.log('SortabeList:(id=' + _this.props.listId  + ')renderList:', width, height, rowCount );
+            return <AutoScrollList 
+              {...listProps}
+              width={width}
+              height={height}
+            />;
+          }
+        }
+      </AutoSizer>
+    }, { max: 1 });
   }
   
   componentDidMount() {
@@ -58,6 +86,7 @@ class SortableList extends PureComponent {
 
   componentDidUpdate(prevProps) {
     if (prevProps.list.rows !== this.props.list.rows && !!this._list) {
+      // console.log('SortabeList:componentDidUpdate:');
       this._list.wrappedInstance.recomputeRowHeights();
     }
   }
@@ -79,6 +108,9 @@ class SortableList extends PureComponent {
     return callWithListInfo(this.props.dropRow, params, this.props);
   }
 
+  onListRef = (ref) => {
+    this._list = ref;
+  }
   renderRow({ index, key, style, parent }) {
     const row = this.props.list.rows[index];
 
@@ -123,22 +155,8 @@ class SortableList extends PureComponent {
   //   return itemRenderer(itemProps);
   // }
 
-  renderList({ width, height }) {
-    // TODO: Check whether scrollbar is visible or not :/
+  // lastListProps = {}
 
-    return <AutoScrollList
-      ref={(c) => (this._list = c)}
-      className='KanbanList'
-      width={width}
-      height={height}
-      deferredMeasurementCache={this.measureCache}
-      rowHeight={this.measureCache.rowHeight}
-      rowCount={this.props.list.rows.length}
-      rowRenderer={this.renderRow}
-      overscanRowCount={this.props.overscanRowCount}
-      verticalStrength={this.verticalStrength}
-    />
-  }
 
   render() {
     const {
@@ -154,9 +172,10 @@ class SortableList extends PureComponent {
       listStyle,
     } = this.props;
 
-    const children = (<AutoSizer>
-      {(dimensions) => this.renderList(dimensions)}
-    </AutoSizer>);
+    const children = this.renderList(
+      this.props.list.rows.length,
+      this.props.overscanRowCount
+    );
     const listProps = {
       list, listId, listStyle, 
       connectDragSource, connectDropTarget, connectDragPreview,
