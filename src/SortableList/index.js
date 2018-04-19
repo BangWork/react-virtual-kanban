@@ -47,7 +47,7 @@ class SortableList extends PureComponent {
     });  
 
     const _this = this;
-    this.renderList = memoize((rowCount, overscanRowCount ) => {
+    this.renderList = /* memoize( */(rowCount, overscanRowCount ) => {
       // TODO: Check whether scrollbar is visible or not :/
       const listProps = {
         ref: _this.onListRef,
@@ -71,7 +71,7 @@ class SortableList extends PureComponent {
           }
         }
       </AutoSizer>
-    }, { max: 1 });
+    }/* , { max: 1 }) */;
   }
   
   componentDidMount() {
@@ -82,6 +82,11 @@ class SortableList extends PureComponent {
 
   componentWillReceiveProps(nextProps) {
     // todo if defaultCardHeight change, recreate cache.
+    // if( nextProps.index !== this.props.index ){
+    //   if( !!this._list){
+    //     this._list.wrappedInstance.scrollToPosition(0);
+    //   }
+    // }
   }
 
   componentDidUpdate(prevProps) {
@@ -90,8 +95,13 @@ class SortableList extends PureComponent {
         this._list.wrappedInstance.recomputeRowHeights();
       }
       if( prevProps.index !== this.props.index ){
-        // console.log('SortableList:componentDidUpdate: hasJustMoved:', this.props.listId, this.props.hasJustMoved);
-        this._list.wrappedInstance.forceUpdateGrid();
+        console.log('SortableList:componentDidUpdate: hasJustMoved:', this.props.listId, this.props.hasJustMoved);
+        // fixme: 实在没有办法，出此下策。
+        setTimeout(() => {
+          if(this._list){
+            this._list.wrappedInstance.scrollToPosition(0);
+          }
+        }, 1000 );
       }
     }
   }
