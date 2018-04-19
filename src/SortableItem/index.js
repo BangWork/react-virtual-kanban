@@ -30,12 +30,13 @@ class SortableItem extends React.PureComponent {
       rowStyle,
       measure,
       captureHeight,
+      index,
     } = this.props;
 
     const itemProps = {
       row, rowId, fromListId, listId, rowStyle, isDragging, 
       connectDropTarget, connectDragSource, connectDragPreview,
-      measure, captureHeight,
+      measure, captureHeight, index,
     };
 
     return itemRenderer(itemProps);

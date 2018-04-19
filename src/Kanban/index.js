@@ -310,6 +310,7 @@ class Kanban extends PureComponent {
     return (
       <SortableList
         key={list.id}
+        index={columnIndex}
         listId={list.id}
         listStyle={style}
         listRenderer={this.props.listRenderer}

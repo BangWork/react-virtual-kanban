@@ -89,9 +89,9 @@ class SortableList extends PureComponent {
       if (prevProps.list.rows !== this.props.list.rows) {
         this._list.wrappedInstance.recomputeRowHeights();
       }
-      if( prevProps.hasJustMoved !== this.props.hasJustMoved ){
+      if( prevProps.index !== this.props.index ){
         // console.log('SortableList:componentDidUpdate: hasJustMoved:', this.props.listId, this.props.hasJustMoved);
-        this._list.wrappedInstance.forceUpdate();
+        this._list.wrappedInstance.forceUpdateGrid();
       }
     }
   }
@@ -128,6 +128,7 @@ class SortableList extends PureComponent {
     >
       {({measure}) => ( <SortableItem
         key={row.id}
+        index={index}
         row={row}
         rowId={row.id}
         listId={this.props.listId}
@@ -175,6 +176,7 @@ class SortableList extends PureComponent {
       connectDropTarget,
       connectDragPreview,
       listStyle,
+      index,
       hasJustMoved,
     } = this.props;
 
@@ -185,12 +187,9 @@ class SortableList extends PureComponent {
       this.props.overscanRowCount,
     );
     const listProps = {
-      list, listId, listStyle, 
+      list, listId, listStyle, index,
       connectDragSource, connectDropTarget, connectDragPreview,
-      isDragging,
-      isDraggingOver,
-      canDrop,
-      children,
+      isDragging, isDraggingOver, canDrop, children,
     };
     return listRenderer(listProps);
   }
