@@ -1,16 +1,18 @@
 import { findDOMNode } from 'react-dom';
-import { width } from 'dom-helpers/query';
+import { width,  height } from 'dom-helpers/query';
 
 export function beginDrag(props, _, component) {
   const node = findDOMNode(component);
   const containerWidth = node ? width(node) : 0;
+  const containerHeight = node ? height(node) : 0;
 
   const data = {
-    lists: props.lists,
+    listId: props.listId,
     row: props.row,
     rowId: props.rowId,
     rowStyle: props.rowStyle,
     containerWidth,
+    containerHeight,
   };
 
   props.dragBeginRow(data);

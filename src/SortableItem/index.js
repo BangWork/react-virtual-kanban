@@ -21,6 +21,7 @@ class SortableItem extends React.PureComponent {
       row,
       rowId,
       listId,
+      fromListId,
       itemRenderer,
       isDragging,
       connectDragSource,
@@ -28,12 +29,13 @@ class SortableItem extends React.PureComponent {
       connectDragPreview,
       rowStyle,
       measure,
+      captureHeight,
     } = this.props;
 
     const itemProps = {
-      row, rowId, listId, rowStyle, isDragging, 
+      row, rowId, fromListId, listId, rowStyle, isDragging, 
       connectDropTarget, connectDragSource, connectDragPreview,
-      measure, 
+      measure, captureHeight,
     };
 
     return itemRenderer(itemProps);
@@ -45,10 +47,14 @@ const connectDrop = DropTarget(ROW_TYPE, dropSpec, connect => ({
 }))
 
 
-const connectDrag = DragSource(ROW_TYPE, dragSpec, (connect, monitor) => ({
-  connectDragSource: connect.dragSource(),
-  connectDragPreview: connect.dragPreview(),
-  isDragging: monitor.isDragging(),
-}))
+const connectDrag = DragSource(ROW_TYPE, dragSpec, (connect, monitor) => {
+  const item = monitor.getItem();
+  return {
+    connectDragSource: connect.dragSource(),
+    connectDragPreview: connect.dragPreview(),
+    isDragging: monitor.isDragging(),
+    captureHeight: item && item.containerHeight,
+  }
+})
 
 export default connectDrop(connectDrag(SortableItem));

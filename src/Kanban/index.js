@@ -59,8 +59,9 @@ class Kanban extends PureComponent {
     super(props);
 
     this.state = {
-      lists: props.lists
+      lists: props.lists,
     };
+    this.lastMovedListId = null;
 
     this.isDraggingList = false;
     this.horizontalStrength = createHorizontalStrength(200);
@@ -117,6 +118,7 @@ class Kanban extends PureComponent {
     if (prevState.lists !== this.state.lists) {
       this._grid.wrappedInstance.forceUpdate();
     }
+    this.lastMovedListId = null;
   }
 
   componentWillUnmount(){
@@ -220,6 +222,7 @@ class Kanban extends PureComponent {
     // console.log('do move. from:', from, 'to:',to);
 
     // const newLists = updateLists(this.state.lists, {from, to});
+    this.lastMovedListId = to.listId;
     this.scheduleUpdate(
       prevState => ({ lists: updateLists(prevState.lists, { from, to })}),
       () => {
@@ -302,6 +305,7 @@ class Kanban extends PureComponent {
 
   renderList({ columnIndex, key, style }) {
     const list = this.state.lists[columnIndex];
+    const hasJustMoved = list.id === this.lastMovedListId;
 
     return (
       <SortableList
@@ -326,6 +330,7 @@ class Kanban extends PureComponent {
         defaultCardHeight={this.props.defaultCardHeight}
         canDropRow={this.props.canDropRow}
         canDropList={this.props.canDropList}
+        hasJustMoved={hasJustMoved}
       />
     );
   }

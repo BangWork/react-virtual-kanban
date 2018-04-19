@@ -47,7 +47,7 @@ class SortableList extends PureComponent {
     });  
 
     const _this = this;
-    this.renderList = memoize((rowCount, overscanRowCount) => {
+    this.renderList = memoize((rowCount, overscanRowCount ) => {
       // TODO: Check whether scrollbar is visible or not :/
       const listProps = {
         ref: _this.onListRef,
@@ -56,13 +56,13 @@ class SortableList extends PureComponent {
         rowHeight: _this.measureCache.rowHeight,
         rowRenderer: _this.renderRow,
         verticalStrength: _this.verticalStrength,
-        rowCount, overscanRowCount,
+        rowCount, overscanRowCount, 
       }
   
       return <AutoSizer>
         { 
           ({width, height}) => {
-            // console.log('SortabeList:(id=' + _this.props.listId  + ')renderList:', width, height, rowCount );
+            // console.log('SortabeList:(id=' + _this.props.listId  + ')renderList:', width, height, rowCount, scrollToIndex );
             return <AutoScrollList 
               {...listProps}
               width={width}
@@ -85,9 +85,14 @@ class SortableList extends PureComponent {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.list.rows !== this.props.list.rows && !!this._list) {
-      // console.log('SortabeList:componentDidUpdate:');
-      this._list.wrappedInstance.recomputeRowHeights();
+    if( !!this._list){
+      if (prevProps.list.rows !== this.props.list.rows) {
+        this._list.wrappedInstance.recomputeRowHeights();
+      }
+      if( prevProps.hasJustMoved !== this.props.hasJustMoved ){
+        // console.log('SortableList:componentDidUpdate: hasJustMoved:', this.props.listId, this.props.hasJustMoved);
+        this._list.wrappedInstance.forceUpdate();
+      }
     }
   }
 
@@ -170,11 +175,14 @@ class SortableList extends PureComponent {
       connectDropTarget,
       connectDragPreview,
       listStyle,
+      hasJustMoved,
     } = this.props;
 
+    // const scrollToRow = hasJustMoved ? 0 : -1;
+    // const renderStamp = hasJustMoved ? (new Date()).getTime() : 0;
     const children = this.renderList(
       this.props.list.rows.length,
-      this.props.overscanRowCount
+      this.props.overscanRowCount,
     );
     const listProps = {
       list, listId, listStyle, 
@@ -196,10 +204,12 @@ const connectDrop = DropTarget([LIST_TYPE, ROW_TYPE], dropSpec, (connect, monito
   isDraggingRowOver: monitor.isOver() && monitor.getItemType() === ROW_TYPE,
 }))
 
-const connectDrag = DragSource(LIST_TYPE, dragSpec, (connect, monitor) => ({
-  connectDragSource: connect.dragSource(),
-  connectDragPreview: connect.dragPreview(),
-  isDragging: monitor.isDragging(),
-}))
+const connectDrag = DragSource(LIST_TYPE, dragSpec, (connect, monitor) => {
+  return {
+    connectDragSource: connect.dragSource(),
+    connectDragPreview: connect.dragPreview(),
+    isDragging: monitor.isDragging(),
+  }
+})
 
 export default connectDrop(connectDrag(SortableList));
