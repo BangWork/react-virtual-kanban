@@ -5,6 +5,7 @@ import { DragDropContext } from 'react-dnd';
 import { Grid } from 'react-virtualized';
 import scrollbarSize from 'dom-helpers/util/scrollbarSize';
 import isEqualWith from 'lodash/isEqualWith';
+import isEqual from 'lodash/isEqualWith';
 import has from 'lodash/has';
 
 import {
@@ -61,7 +62,6 @@ class Kanban extends PureComponent {
     this.state = {
       lists: props.lists,
     };
-    this.lastMovedListId = null;
 
     this.isDraggingList = false;
     this.horizontalStrength = createHorizontalStrength(200);
@@ -87,6 +87,9 @@ class Kanban extends PureComponent {
   
   tempState = null;
   componentWillReceiveProps(nextProps) {
+    if( this.props.lists !== nextProps.lists ){
+      this.lastMoveInfo = null;
+    }
     if( this.isDraggingList ){
       let listIdsChanged = !isEqualWith(this.props.lists, nextProps.lists, listIdEqualCustomer);
       if( listIdsChanged ){
@@ -118,7 +121,6 @@ class Kanban extends PureComponent {
     if (prevState.lists !== this.state.lists) {
       this._grid.wrappedInstance.forceUpdate();
     }
-    this.lastMovedListId = null;
   }
 
   componentWillUnmount(){
@@ -222,7 +224,6 @@ class Kanban extends PureComponent {
     // console.log('do move. from:', from, 'to:',to);
 
     // const newLists = updateLists(this.state.lists, {from, to});
-    this.lastMovedListId = to.listId;
     this.scheduleUpdate(
       prevState => ({ lists: updateLists(prevState.lists, { from, to })}),
       () => {
@@ -237,10 +238,15 @@ class Kanban extends PureComponent {
     );
   }
 
+  lastMoveInfo = null;
   onMoveRow(from, to) {
     // console.log('onMoveRow(). from = ', from, ', to = ', to);
+    const moveInfo = { from , to };
+    if( isEqual(moveInfo, this.lastMoveInfo)){
+      return;
+    }
     this.scheduleUpdate(
-      prevState => ({ lists: updateLists(prevState.lists, { from, to })}),
+      prevState => ({ lists: updateLists(prevState.lists, moveInfo)}),
       () => {
           const lists = this.state.lists;
 
@@ -253,6 +259,8 @@ class Kanban extends PureComponent {
         });
       }
     );
+
+    this.lastMoveInfo = { from, to };
   }
 
   onDropList({ listId }) {
@@ -305,7 +313,6 @@ class Kanban extends PureComponent {
 
   renderList({ columnIndex, key, style }) {
     const list = this.state.lists[columnIndex];
-    const hasJustMoved = list.id === this.lastMovedListId;
 
     return (
       <SortableList
@@ -331,7 +338,6 @@ class Kanban extends PureComponent {
         defaultCardHeight={this.props.defaultCardHeight}
         canDropRow={this.props.canDropRow}
         canDropList={this.props.canDropList}
-        hasJustMoved={hasJustMoved}
       />
     );
   }

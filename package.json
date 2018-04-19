@@ -92,6 +92,7 @@
     "classnames": "2.2.5",
     "dnd-core": "^2.2.3",
     "dom-helpers": "^2.4.0",
+    "lodash": "^4.17.4",
     "memoizee": "0.4.11",
     "react-addons-update": "15.4.1",
     "react-dnd": "2.6.0",

@@ -157,9 +157,9 @@ function moveItemToList(lists, { fromId, toId }) {
   }
 
   // Only move when list is empty
-  if (toList.rows.length > 0) {
-    return lists;
-  }
+  // if (toList.rows.length > 0) {
+    // return lists;
+  // }
 
   const fromItem = fromList.rows[fromIndex];
 

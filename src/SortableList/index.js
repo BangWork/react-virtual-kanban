@@ -95,7 +95,6 @@ class SortableList extends PureComponent {
         this._list.wrappedInstance.recomputeRowHeights();
       }
       if( prevProps.index !== this.props.index ){
-        console.log('SortableList:componentDidUpdate: hasJustMoved:', this.props.listId, this.props.hasJustMoved);
         // fixme: 实在没有办法，出此下策。
         setTimeout(() => {
           if(this._list){
@@ -187,11 +186,8 @@ class SortableList extends PureComponent {
       connectDragPreview,
       listStyle,
       index,
-      hasJustMoved,
     } = this.props;
 
-    // const scrollToRow = hasJustMoved ? 0 : -1;
-    // const renderStamp = hasJustMoved ? (new Date()).getTime() : 0;
     const children = this.renderList(
       this.props.list.rows.length,
       this.props.overscanRowCount,
