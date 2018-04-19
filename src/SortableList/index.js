@@ -47,7 +47,7 @@ class SortableList extends PureComponent {
     });  
 
     const _this = this;
-    this.renderList = /* memoize( */(rowCount, overscanRowCount ) => {
+    this.renderList = memoize((rowCount, overscanRowCount ) => {
       // TODO: Check whether scrollbar is visible or not :/
       const listProps = {
         ref: _this.onListRef,
@@ -71,7 +71,7 @@ class SortableList extends PureComponent {
           }
         }
       </AutoSizer>
-    }/* , { max: 1 }) */;
+    }, { max: 1 });
   }
   
   componentDidMount() {
