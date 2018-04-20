@@ -103,23 +103,10 @@ function moveItems(lists, { fromId, toId }) {
   }
 
   const fromList = lists[fromListIndex];
-
-  if (fromListIndex === toListIndex) {
-    return update(lists, {
-      [fromListIndex]: {
-        rows: {
-          $splice: [
-            buildUpdateOperation(fromList.rows, {from: fromIndex, to: toIndex})
-          ]
-        }
-      }
-    });
-  }
-
   const fromItem = fromList.rows[fromIndex];
 
-  return update(lists, {
-    // Remove item from source list
+  // Remove item from source list
+  const removeUpdateItem = {
     [fromListIndex]: {
       rows: {
         $splice: [
@@ -127,7 +114,10 @@ function moveItems(lists, { fromId, toId }) {
         ]
       }
     },
-    // Add item to target list
+  };
+
+  // Add item to target list
+  const pushUpdateItem = {
     [toListIndex]: {
       rows: {
         $splice: [
@@ -135,7 +125,23 @@ function moveItems(lists, { fromId, toId }) {
         ]
       }
     },
-  });
+  }
+
+  // console.log('moveItems. lists: ', lists, 'fromId: ', fromId, 'toId: ', toId);
+  let ret = lists;
+  if( fromListIndex === toListIndex ){
+    if(fromIndex !== toIndex ){
+      ret = update(ret, removeUpdateItem);
+      ret = update(ret, pushUpdateItem);
+    }
+  }else{
+    const updateItem = {...removeUpdateItem, ...pushUpdateItem };
+    // console.log('moveItems: updateItem: ', updateItem );
+    ret = update(ret, updateItem);
+  }
+
+  // console.log('ret: ', ret);
+  return ret;
 }
 
 function moveItemToList(lists, { fromId, toId }) {
@@ -166,12 +172,7 @@ function moveItemToList(lists, { fromId, toId }) {
 
   const fromItem = fromList.rows[fromIndex];
 
-  // if( toList.rows.includes(fromItem)){
-  //   console.warn(`Item already in toList`);
-  //   return lists;
-  // }
-
-  // console.log('lists: ', lists, 'fromId: ', fromId, 'toId: ', toId);
+  // console.log('moveItemToList. lists: ', lists, 'fromId: ', fromId, 'toId: ', toId);
 
   // Remove item from source list
   const removeUpdateItem = {
@@ -196,11 +197,12 @@ function moveItemToList(lists, { fromId, toId }) {
 
   if( fromListIndex === toListIndex ){
     if(fromIndex !== fromList.rows.length -1){
-      ret = update(lists, removeUpdateItem);
-      ret = update(lists, pushUpdateItem);
+      ret = update(ret, removeUpdateItem);
+      ret = update(ret, pushUpdateItem);
     }
   }else{
-    ret = update(lists, { ...removeUpdateItem, ...pushUpdateItem});
+    const updateItem = { ...removeUpdateItem, ...pushUpdateItem};
+    ret = update(ret, updateItem);
   }
 
   // console.log('ret: ', ret);

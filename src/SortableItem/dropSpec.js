@@ -59,13 +59,15 @@ export function hover(props, monitor, component) {
 export function canDrop(props, monitor) {
   const item = monitor.getItem();
 
-  return props.canDropRow({
+  const ret = props.canDropRow({
     source: item,
     target: {
       listId: props.listId,
       list: props.list,
     },
   });
+  // console.log('SortableItem:canDrop:', ret );
+  return ret;
 }
 
 export function drop(props) {

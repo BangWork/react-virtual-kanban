@@ -23,9 +23,9 @@ export function hover(props, monitor, component) {
   const { listId: dragListId } = item;
   const { listId: hoverListId } = props;
 
-  if (dragListId === hoverListId) {
-    return;
-  }
+  // if (dragListId === hoverListId) {
+  //   return;
+  // }
 
   if (itemType === LIST_TYPE) {
       // Sometimes component may be null when it's been unmounted
@@ -54,27 +54,28 @@ export function hover(props, monitor, component) {
 export function canDrop(props, monitor) {
   const item = monitor.getItem();
   const itemType = monitor.getItemType();
+  let ret = false;
 
   if (itemType === LIST_TYPE) {
-    return props.canDropList({
+    ret = props.canDropList({
       source: item,
       target: {
         listId: props.listId,
         list: props.list,
       }
     });
+  } else if (itemType === ROW_TYPE) {
+    ret = props.canDropRow({
+      source: item,
+      target: {
+        listId: props.listId,
+        list: props.list,
+      },
+    });
   }
 
-  if (itemType === ROW_TYPE) {
-    return item.listId !== props.listId 
-      && props.canDropRow({
-        source: item,
-        target: {
-          listId: props.listId,
-          list: props.list,
-        },
-      });
-  }
+  // console.log('SortableList:canDrop:', ret );
+  return ret;
 }
 
 export function drop(props, monitor) {

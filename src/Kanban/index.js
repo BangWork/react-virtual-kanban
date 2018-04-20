@@ -91,9 +91,9 @@ class Kanban extends PureComponent {
   
   tempState = null;
   componentWillReceiveProps(nextProps) {
-    if( this.props.lists !== nextProps.lists ){
-      this.lastMoveRowInfo = null;
-    }
+    // if( this.props.lists !== nextProps.lists ){
+    //   this.lastMoveRowInfo = null;
+    // }
     if( this.isDraggingList ){
       let listIdsChanged = !isEqualWith(this.props.lists, nextProps.lists, listIdEqualCustomer);
       if( listIdsChanged ){
@@ -281,11 +281,18 @@ class Kanban extends PureComponent {
     );
   }
 
-  lastMoveRowInfo = null;
+  isDumplicateMove(moveInfo){
+    return moveInfo.lists === this.lastMoveRowInfo.lists
+     && isEqual(moveInfo.from, this.lastMoveRowInfo.from )
+     && isEqual(moveInfo.to, this.lastMoveRowInfo.to )
+  }
+
+  lastMoveRowInfo = {};
   onMoveRow(from, to) {
     // console.log('onMoveRow(). from = ', from, ', to = ', to);
-    const moveInfo = { from , to };
-    if( isEqual(moveInfo, this.lastMoveRowInfo)){
+    const lists = this.state.lists;
+    const moveInfo = { lists, from , to };
+    if( this.isDumplicateMove(moveInfo)){
       return;
     }
     this.scheduleUpdate(
@@ -303,7 +310,7 @@ class Kanban extends PureComponent {
       }
     );
 
-    this.lastMoveRowInfo = { from, to };
+    this.lastMoveRowInfo = moveInfo;
   }
 
   onDropList({ listId }) {
