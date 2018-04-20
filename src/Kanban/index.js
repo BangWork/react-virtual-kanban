@@ -7,6 +7,8 @@ import scrollbarSize from 'dom-helpers/util/scrollbarSize';
 import isEqualWith from 'lodash/isEqualWith';
 import isEqual from 'lodash/isEqualWith';
 import has from 'lodash/has';
+import isFunction from 'lodash/isFunction';
+import memoize from 'memoizee';
 
 import {
   updateLists,
@@ -33,6 +35,8 @@ function listIdEqualCustomer(a,b){
     return a.id === b.id
   }
 }
+
+const ResetDelayTime = 1000;
 class Kanban extends PureComponent {
   static propTypes = propTypes;
 
@@ -88,7 +92,7 @@ class Kanban extends PureComponent {
   tempState = null;
   componentWillReceiveProps(nextProps) {
     if( this.props.lists !== nextProps.lists ){
-      this.lastMoveInfo = null;
+      this.lastMoveRowInfo = null;
     }
     if( this.isDraggingList ){
       let listIdsChanged = !isEqualWith(this.props.lists, nextProps.lists, listIdEqualCustomer);
@@ -126,6 +130,7 @@ class Kanban extends PureComponent {
   componentWillUnmount(){
     // this.endScrollCheckTimer();
     cancelAnimationFrame(this._requestedFrame);
+    this.cancelRestListPosition();
   }
 
   scheduleUpdate(updateFn, callbackFn) {
@@ -202,7 +207,43 @@ class Kanban extends PureComponent {
   //   }
   // }
 
-  lastMoveListInfo = {};
+  // 在等待被 resetPosition 的 list
+  listIdsWaitingToResetPosition = new Set();
+  // timerId 的暂存。
+  timerIdsOfWaitingReset = {};
+  delayResetListPosition( listIds ){
+    if( listIds.length <= 0 ) return ;
+
+    listIds.forEach( id =>{ 
+      if(!this.listIdsWaitingToResetPosition.has(id)){
+        const timerId = setTimeout(() => {
+          let list = this.listRefs[id];
+          while(!isFunction(list.scrollToTop) && list ){
+            list = list.decoratedComponentInstance;
+          }
+          if(list){
+            list.scrollToTop();
+          }
+          this.listIdsWaitingToResetPosition.delete(id);
+          delete this.timerIdsOfWaitingReset[id]
+        }, ResetDelayTime );
+        this.timerIdsOfWaitingReset[id] = timerId;
+      }
+    });
+  }
+  cancelRestListPosition(){
+    for( const id of this.listIdsWaitingToResetPosition ){
+      const timerId = this.timerIdsOfWaitingReset[id];
+      if(timerId){
+        clearTimeout(timerId);
+      }
+      delete this.timerIdsOfWaitingReset[id];
+    }
+    this.listIdsWaitingToResetPosition.clear();
+  }
+
+  // 上一次腿拽过程中，有哪些 list 位置变了。
+  listIdsMovedInLastCycle = new Set();
   onMoveList(from, to) {
     if(this.isScrolling) {
       console.log('is isScrolling, ignore');
@@ -224,6 +265,8 @@ class Kanban extends PureComponent {
     // console.log('do move. from:', from, 'to:',to);
 
     // const newLists = updateLists(this.state.lists, {from, to});
+    this.listIdsMovedInLastCycle.add(from.listId);
+    this.listIdsMovedInLastCycle.add(to.listId);
     this.scheduleUpdate(
       prevState => ({ lists: updateLists(prevState.lists, { from, to })}),
       () => {
@@ -238,11 +281,11 @@ class Kanban extends PureComponent {
     );
   }
 
-  lastMoveInfo = null;
+  lastMoveRowInfo = null;
   onMoveRow(from, to) {
     // console.log('onMoveRow(). from = ', from, ', to = ', to);
     const moveInfo = { from , to };
-    if( isEqual(moveInfo, this.lastMoveInfo)){
+    if( isEqual(moveInfo, this.lastMoveRowInfo)){
       return;
     }
     this.scheduleUpdate(
@@ -260,7 +303,7 @@ class Kanban extends PureComponent {
       }
     );
 
-    this.lastMoveInfo = { from, to };
+    this.lastMoveRowInfo = { from, to };
   }
 
   onDropList({ listId }) {
@@ -282,6 +325,7 @@ class Kanban extends PureComponent {
   onDragBeginList(data) {
     this.isDraggingList = true;
     this.props.onDragBeginList(data);
+    this.cancelRestListPosition();
     // 这里回调 onDragBeginList 后，上层组件一定会重新设置 props，所以不用再把 tempState 设置回去了。
     // 如果上层组件不理会这个回掉，则状态会一直维持当前状态，效果也不差。
     // if( !this.tempState ){
@@ -293,6 +337,8 @@ class Kanban extends PureComponent {
   onDragEndList({ listId }) {
     this.isDraggingList = false;
     this.props.onDragEndList(this.listEndData({ listId }));
+    this.delayResetListPosition([...this.listIdsMovedInLastCycle]);
+    this.listIdsMovedInLastCycle.clear();
   }
 
 
@@ -311,11 +357,14 @@ class Kanban extends PureComponent {
   
   
 
+  listRefs = {}
+  getListRefCallback = memoize(id => ref => { this.listRefs[id] = ref; })
   renderList({ columnIndex, key, style }) {
     const list = this.state.lists[columnIndex];
 
     return (
       <SortableList
+        ref={this.getListRefCallback(list.id)}
         key={list.id}
         index={columnIndex}
         listId={list.id}

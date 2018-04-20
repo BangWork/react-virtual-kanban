@@ -94,14 +94,20 @@ class SortableList extends PureComponent {
       if (prevProps.list.rows !== this.props.list.rows) {
         this._list.wrappedInstance.recomputeRowHeights();
       }
-      if( prevProps.index !== this.props.index ){
-        // fixme: 实在没有办法，出此下策。
-        setTimeout(() => {
-          if(this._list){
-            this._list.wrappedInstance.scrollToPosition(0);
-          }
-        }, 1000 );
-      }
+      // if( prevProps.index !== this.props.index ){
+      //   // fixme: 实在没有办法，出此下策。
+      //   setTimeout(() => {
+      //     if(this._list){
+      //       this._list.wrappedInstance.scrollToPosition(0);
+      //     }
+      //   }, 1000 );
+      // }
+    }
+  }
+
+  scrollToTop(){
+    if(this._list){
+      this._list.wrappedInstance.scrollToPosition(0);
     }
   }
 
