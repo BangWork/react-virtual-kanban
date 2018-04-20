@@ -21,6 +21,7 @@ import * as decorators from '../decorators';
 import DragLayer from '../DragLayer';
 import SortableList from '../SortableList';
 
+const ZeroScrollStrength = () => 0;
 const GridWithScrollZone = withScrolling(Grid);
 
 // import { DragDropManager } from 'dnd-core';
@@ -65,7 +66,6 @@ class Kanban extends PureComponent {
 
     this.isDraggingList = false;
     this.horizontalStrength = createHorizontalStrength(200);
-    this.verticalStrength = () => {};
 
     this.onMoveList = this.onMoveList.bind(this);
     this.onMoveRow = this.onMoveRow.bind(this);
@@ -373,7 +373,7 @@ class Kanban extends PureComponent {
           overscanColumnCount={overscanListCount}
           horizontalStrength={this.horizontalStrength}
           strengthMultiplier={5}
-          // verticalStrength={this.verticalStrength}
+          verticalStrength={ZeroScrollStrength}
           scrollToColumn={scrollToList}
           scrollToAlignment={scrollToAlignment}
           speed={100}
