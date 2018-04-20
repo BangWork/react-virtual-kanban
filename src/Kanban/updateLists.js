@@ -143,18 +143,21 @@ function moveItemToList(lists, { fromId, toId }) {
   const fromListIndex = findItemListIndex(lists, fromId);
   const toListIndex = findListIndex(lists, toId);
 
+  let ret = lists;
   if (fromIndex === -1) {
     console.warn(`Item not in bounds`);
-    return lists;
+    return ret;
   }
+
 
   const fromList = lists[fromListIndex];
   const toList = lists[toListIndex];
 
   if (!toList) {
     console.warn(`List is not an object`);
-    return lists;
+    return ret;
   }
+
 
   // Only move when list is empty
   // if (toList.rows.length > 0) {
@@ -163,16 +166,25 @@ function moveItemToList(lists, { fromId, toId }) {
 
   const fromItem = fromList.rows[fromIndex];
 
-  return update(lists, {
-    // Remove item from source list
+  // if( toList.rows.includes(fromItem)){
+  //   console.warn(`Item already in toList`);
+  //   return lists;
+  // }
+
+  // console.log('lists: ', lists, 'fromId: ', fromId, 'toId: ', toId);
+
+  // Remove item from source list
+  const removeUpdateItem = {
     [fromListIndex]: {
       rows: {
         $splice: [
           [fromIndex, 1],
         ]
       }
-    },
-    // Add item to target list
+    }
+  };
+  // Add item to target list
+  const pushUpdateItem = {
     [toListIndex]: {
       rows: {
         $push: [
@@ -180,7 +192,19 @@ function moveItemToList(lists, { fromId, toId }) {
         ]
       }
     },
-  });
+  };
+
+  if( fromListIndex === toListIndex ){
+    if(fromIndex !== fromList.rows.length -1){
+      ret = update(lists, removeUpdateItem);
+      ret = update(lists, pushUpdateItem);
+    }
+  }else{
+    ret = update(lists, { ...removeUpdateItem, ...pushUpdateItem});
+  }
+
+  // console.log('ret: ', ret);
+  return ret;
 }
 
 export function updateLists(lists, params) {
