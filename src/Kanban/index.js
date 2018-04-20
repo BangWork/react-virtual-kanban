@@ -130,7 +130,7 @@ class Kanban extends PureComponent {
   componentWillUnmount(){
     // this.endScrollCheckTimer();
     cancelAnimationFrame(this._requestedFrame);
-    this.cancelRestListPosition();
+    this.cancelAlScrollToTopActions();
   }
 
   scheduleUpdate(updateFn, callbackFn) {
@@ -208,15 +208,16 @@ class Kanban extends PureComponent {
   // }
 
   // 在等待被 resetPosition 的 list
-  listIdsWaitingToResetPosition = new Set();
+  listIdsWaitingForScrollingToTop = new Set();
   // timerId 的暂存。
-  timerIdsOfWaitingReset = {};
-  delayResetListPosition( listIds ){
-    if( listIds.length <= 0 ) return ;
+  timerIdsOfWaitingActions = {};
+  delayScrollToTop( listIdSet ){
+    if( listIdSet.size <= 0 ) return ;
 
-    listIds.forEach( id =>{ 
-      if(!this.listIdsWaitingToResetPosition.has(id)){
-        const timerId = setTimeout(() => {
+    this.cancelScrollToTopActions(listIdSet);
+    for ( const id of listIdSet ){
+      if(!this.listIdsWaitingForScrollingToTop.has(id)){
+        const delayFunction = () => {
           let list = this.listRefs[id];
           while(!isFunction(list.scrollToTop) && list ){
             list = list.decoratedComponentInstance;
@@ -224,26 +225,32 @@ class Kanban extends PureComponent {
           if(list){
             list.scrollToTop();
           }
-          this.listIdsWaitingToResetPosition.delete(id);
-          delete this.timerIdsOfWaitingReset[id]
-        }, ResetDelayTime );
-        this.timerIdsOfWaitingReset[id] = timerId;
+          this.listIdsWaitingForScrollingToTop.delete(id);
+          delete this.timerIdsOfWaitingActions[id]
+        };
+        const timerId = setTimeout( delayFunction, ResetDelayTime );
+        this.timerIdsOfWaitingActions[id] = timerId;
       }
-    });
+    };
   }
-  cancelRestListPosition(){
-    for( const id of this.listIdsWaitingToResetPosition ){
-      const timerId = this.timerIdsOfWaitingReset[id];
+
+  cancelAlScrollToTopActions(){
+    this.cancelScrollToTopActions(new Set(this.listIdsWaitingForScrollingToTop));
+  }
+  
+  cancelScrollToTopActions(idSet){
+    for( const id of idSet){
+      const timerId = this.timerIdsOfWaitingActions[id];
       if(timerId){
         clearTimeout(timerId);
       }
-      delete this.timerIdsOfWaitingReset[id];
+      delete this.timerIdsOfWaitingActions[id];
+      this.listIdsWaitingForScrollingToTop.delete(id);
     }
-    this.listIdsWaitingToResetPosition.clear();
   }
 
   // 上一次腿拽过程中，有哪些 list 位置变了。
-  listIdsMovedInLastCycle = new Set();
+  listIdsMovedInLastDragging = new Set();
   onMoveList(from, to) {
     if(this.isScrolling) {
       console.log('is isScrolling, ignore');
@@ -265,8 +272,8 @@ class Kanban extends PureComponent {
     // console.log('do move. from:', from, 'to:',to);
 
     // const newLists = updateLists(this.state.lists, {from, to});
-    this.listIdsMovedInLastCycle.add(from.listId);
-    this.listIdsMovedInLastCycle.add(to.listId);
+    this.listIdsMovedInLastDragging.add(from.listId);
+    this.listIdsMovedInLastDragging.add(to.listId);
     this.scheduleUpdate(
       prevState => ({ lists: updateLists(prevState.lists, { from, to })}),
       () => {
@@ -332,7 +339,7 @@ class Kanban extends PureComponent {
   onDragBeginList(data) {
     this.isDraggingList = true;
     this.props.onDragBeginList(data);
-    this.cancelRestListPosition();
+    // this.cancelScrollToTopActions( new Set([ data.listId]));
     // 这里回调 onDragBeginList 后，上层组件一定会重新设置 props，所以不用再把 tempState 设置回去了。
     // 如果上层组件不理会这个回掉，则状态会一直维持当前状态，效果也不差。
     // if( !this.tempState ){
@@ -344,8 +351,8 @@ class Kanban extends PureComponent {
   onDragEndList({ listId }) {
     this.isDraggingList = false;
     this.props.onDragEndList(this.listEndData({ listId }));
-    this.delayResetListPosition([...this.listIdsMovedInLastCycle]);
-    this.listIdsMovedInLastCycle.clear();
+    this.delayScrollToTop(this.listIdsMovedInLastDragging);
+    this.listIdsMovedInLastDragging.clear();
   }
 
 
