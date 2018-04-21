@@ -219,7 +219,7 @@ class Kanban extends PureComponent {
       if(!this.listIdsWaitingForScrollingToTop.has(id)){
         const delayFunction = () => {
           let list = this.listRefs[id];
-          while(!isFunction(list.scrollToTop) && list ){
+          while(list && !isFunction(list.scrollToTop)){
             list = list.decoratedComponentInstance;
           }
           if(list){
