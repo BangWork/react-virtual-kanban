@@ -17,6 +17,7 @@ import PureComponent from '../PureComponent';
 const AutoScrollList = withScrolling(List);
 
 
+const ZeroScrollStrength = () => 0;
 // const identity = (c) => c;
 function callWithListInfo(func,params, props){
   return func({
@@ -56,6 +57,7 @@ class SortableList extends PureComponent {
         rowHeight: _this.measureCache.rowHeight,
         rowRenderer: _this.renderRow,
         verticalStrength: _this.verticalStrength,
+        horizontalStrength: ZeroScrollStrength,
         rowCount, overscanRowCount, 
       }
   
