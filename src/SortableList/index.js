@@ -188,6 +188,8 @@ class SortableList extends PureComponent {
       listRenderer,
       isDragging,
       isDraggingOver,
+      isDraggingListOver,
+      isDraggingRowOver,
       canDrop,
       connectDragSource,
       connectDropTarget,
@@ -203,7 +205,8 @@ class SortableList extends PureComponent {
     const listProps = {
       list, listId, listStyle, index,
       connectDragSource, connectDropTarget, connectDragPreview,
-      isDragging, isDraggingOver, canDrop, children,
+      isDragging, isDraggingOver, isDraggingListOver, isDraggingRowOver,
+      canDrop, children,
     };
     return listRenderer(listProps);
   }
